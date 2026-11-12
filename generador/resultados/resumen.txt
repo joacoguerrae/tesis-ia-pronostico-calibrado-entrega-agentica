@@ -1,0 +1,121 @@
+Datos: 70 configuraciones, 113 tareas, 31064 corridas con cuatro repeticiones.
+
+A/A: proporción de facts falsos por métrica, cobertura del IC 95 % y estados del generador
+                                                  falsos  falsos_rival  falsos_agentrial  cobertura  equivalencia  no_concluyente
+diseno                   n_tareas metrica                                                                                        
+A/A equilibrado          todas    exito            0.011         0.133               0.0      0.941         0.076           0.912
+                                  costo_usd        0.014         0.014               0.0      0.956         0.945           0.041
+                                  tokens_entrada   0.014         0.037               0.0      0.950         0.894           0.091
+                                  tokens_salida    0.014         0.000               0.0      0.951         0.961           0.026
+                                  pasos            0.011         0.002               0.0      0.949         0.982           0.007
+                                  duracion_s       0.012         0.019               0.0      0.956         0.953           0.035
+                         15       exito            0.001         0.531               0.0      0.967         0.012           0.986
+                                  costo_usd        0.019         0.169               0.0      0.951         0.187           0.794
+                                  tokens_entrada   0.017         0.283               0.0      0.947         0.046           0.936
+                                  tokens_salida    0.014         0.024               0.0      0.954         0.589           0.397
+                                  pasos            0.016         0.065               0.0      0.953         0.361           0.623
+                                  duracion_s       0.015         0.207               0.0      0.945         0.171           0.814
+A/A por orden de corrida todas    exito            0.014         0.100               0.0      0.971         0.057           0.929
+                                  costo_usd        0.200         0.086               0.0      0.743         0.771           0.029
+                                  tokens_entrada   0.043         0.057               0.0      0.929         0.843           0.114
+                                  tokens_salida    0.029         0.000               0.0      0.971         0.943           0.029
+                                  pasos            0.057         0.000               0.0      0.871         0.943           0.000
+                                  duracion_s       0.386         0.186               0.0      0.514         0.586           0.029
+
+A/A: proporción de informes con al menos un fact falso
+                                   falso  falso_rival  falso_agentrial
+diseno                   n_tareas                                     
+A/A equilibrado          15        0.032        0.724              0.0
+                         todas     0.039        0.172              0.0
+A/A por orden de corrida todas     0.443        0.343              0.0
+
+Efectos plantados: detección de la métrica plantada
+                                detectado  detectado_rival  detectado_agentrial  cobertura  falsos  falsos_rival  falsos_agentrial
+n_tareas plantada       tamano                                                                                                    
+todas    costo_usd      0.05        0.443            0.038                  0.0      0.938   0.000         0.005               0.0
+15       costo_usd      0.05        0.024            0.276                  0.0      0.957   0.000         0.019               0.0
+todas    costo_usd      0.10        0.938            0.510                  0.0      0.948   0.000         0.000               0.0
+15       costo_usd      0.10        0.162            0.490                  0.0      0.948   0.000         0.010               0.0
+todas    costo_usd      0.20        0.995            0.990                  0.0      0.976   0.000         0.000               0.0
+15       costo_usd      0.20        0.629            0.910                  0.0      0.962   0.000         0.000               0.0
+todas    costo_usd      0.30        1.000            1.000                  0.0      0.943   0.000         0.000               0.0
+15       costo_usd      0.30        0.876            0.976                  0.0      0.929   0.000         0.000               0.0
+todas    costo_usd      0.50        1.000            1.000                  0.0      0.962   0.000         0.000               0.0
+15       costo_usd      0.50        0.995            0.995                  0.0      0.952   0.000         0.000               0.0
+todas    tokens_entrada 0.05        0.210            0.071                  0.0      0.948   0.000         0.005               0.0
+15       tokens_entrada 0.05        0.048            0.333                  0.0      0.919   0.005         0.033               0.0
+todas    tokens_entrada 0.10        0.786            0.457                  0.0      0.938   0.000         0.000               0.0
+15       tokens_entrada 0.10        0.119            0.529                  0.0      0.943   0.000         0.029               0.0
+todas    tokens_entrada 0.20        0.986            0.962                  0.0      0.924   0.000         0.000               0.0
+15       tokens_entrada 0.20        0.471            0.843                  0.0      0.943   0.000         0.010               0.0
+todas    tokens_entrada 0.30        1.000            1.000                  0.0      0.933   0.000         0.000               0.0
+15       tokens_entrada 0.30        0.719            0.938                  0.0      0.943   0.000         0.019               0.0
+todas    tokens_entrada 0.50        1.000            1.000                  0.0      0.948   0.000         0.000               0.0
+15       tokens_entrada 0.50        0.962            1.000                  0.0      0.971   0.000         0.000               0.0
+todas    tokens_salida  0.05        0.805            0.014                  0.0      0.948   0.005         0.000               0.0
+15       tokens_salida  0.05        0.133            0.143                  0.0      0.919   0.000         0.000               0.0
+todas    tokens_salida  0.10        0.957            0.538                  0.0      0.962   0.000         0.000               0.0
+15       tokens_salida  0.10        0.429            0.510                  0.0      0.976   0.000         0.000               0.0
+todas    tokens_salida  0.20        1.000            1.000                  0.0      0.943   0.000         0.000               0.0
+15       tokens_salida  0.20        0.900            0.976                  0.0      0.952   0.000         0.000               0.0
+todas    tokens_salida  0.30        1.000            1.000                  0.0      0.957   0.000         0.000               0.0
+15       tokens_salida  0.30        0.948            0.995                  0.0      0.948   0.000         0.000               0.0
+todas    tokens_salida  0.50        1.000            1.000                  0.0      0.943   0.000         0.000               0.0
+15       tokens_salida  0.50        0.990            1.000                  0.0      0.948   0.000         0.000               0.0
+todas    pasos          0.05        0.643            0.014                  0.0      0.938   0.000         0.000               0.0
+15       pasos          0.05        0.057            0.152                  0.0      0.933   0.000         0.000               0.0
+todas    pasos          0.10        0.981            0.519                  0.0      0.952   0.000         0.000               0.0
+15       pasos          0.10        0.243            0.500                  0.0      0.962   0.000         0.005               0.0
+todas    pasos          0.20        1.000            0.995                  0.0      0.957   0.000         0.000               0.0
+15       pasos          0.20        0.824            0.962                  0.0      0.952   0.000         0.000               0.0
+todas    pasos          0.30        1.000            1.000                  0.0      0.943   0.000         0.000               0.0
+15       pasos          0.30        0.981            1.000                  0.0      0.938   0.000         0.000               0.0
+todas    pasos          0.50        1.000            1.000                  0.0      0.962   0.000         0.000               0.0
+15       pasos          0.50        1.000            1.000                  0.0      0.952   0.000         0.000               0.0
+todas    duracion_s     0.05        0.410            0.067                  0.0      0.962   0.000         0.000               0.0
+15       duracion_s     0.05        0.048            0.219                  0.0      0.952   0.000         0.029               0.0
+todas    duracion_s     0.10        0.895            0.538                  0.0      0.957   0.000         0.000               0.0
+15       duracion_s     0.10        0.176            0.510                  0.0      0.929   0.000         0.019               0.0
+todas    duracion_s     0.20        1.000            0.981                  0.0      0.943   0.000         0.005               0.0
+15       duracion_s     0.20        0.533            0.900                  0.0      0.957   0.000         0.005               0.0
+todas    duracion_s     0.30        1.000            1.000                  0.0      0.952   0.000         0.000               0.0
+15       duracion_s     0.30        0.833            0.971                  0.0      0.971   0.000         0.005               0.0
+todas    duracion_s     0.50        1.000            1.000                  0.0      0.929   0.000         0.000               0.0
+15       duracion_s     0.50        0.952            0.981                  0.0      0.933   0.000         0.000               0.0
+todas    exito          0.05        0.114            0.529                  0.0      0.967   0.000         0.000               0.0
+15       exito          0.05        0.010            0.505                  0.0      0.938   0.005         0.133               0.0
+todas    exito          0.10        0.524            0.929                  0.0      0.952   0.000         0.000               0.0
+15       exito          0.10        0.024            0.705                  0.0      0.948   0.000         0.071               0.0
+todas    exito          0.20        0.995            1.000                  0.0      0.976   0.000         0.000               0.0
+15       exito          0.20        0.181            0.971                  0.0      0.967   0.000         0.005               0.0
+todas    exito          0.30        1.000            1.000                  0.0      0.957   0.000         0.000               0.0
+15       exito          0.30        0.395            0.995                  0.0      0.957   0.000         0.000               0.0
+
+Efectos plantados: facts falsos en las métricas sin efecto
+          falsos  falsos_rival  falsos_agentrial
+n_tareas                                        
+15         0.017         0.213               0.0
+todas      0.020         0.034               0.0
+
+Efectos plantados en el éxito: error típico del efecto real, relativo al plantado (mediana)
+n_tareas
+15       0.071
+todas    0.027
+
+Menor efecto detectado en al menos 80 % de los casos: relativo, o en puntos para el éxito (vacío: ninguno de los probados)
+n_tareas        todas   15
+plantada                  
+exito            0.20  NaN
+costo_usd        0.10  0.3
+tokens_entrada   0.20  0.5
+tokens_salida    0.05  0.2
+pasos            0.10  0.2
+duracion_s       0.10  0.3
+
+Ejemplo de informe: claude-opus-5, esfuerzo medium contra high (todas las corridas válidas)
+- No se puede concluir si la tasa de éxito cambia de opus-5-medium a opus-5-high (IC 95 %: de -0,7 a +8,4 puntos; 113 tareas).
+- De opus-5-medium a opus-5-high, el costo sube 93 % (IC 95 %: de +86 a +100 %; 113 tareas).
+- De opus-5-medium a opus-5-high, los tokens de entrada suben 129 % (IC 95 %: de +117 a +141 %; 113 tareas).
+- De opus-5-medium a opus-5-high, los tokens de salida suben 76 % (IC 95 %: de +71 a +81 %; 113 tareas).
+- De opus-5-medium a opus-5-high, los pasos suben 44 % (IC 95 %: de +39 a +48 %; 113 tareas).
+- De opus-5-medium a opus-5-high, la duración sube 64 % (IC 95 %: de +58 a +71 %; 113 tareas).

@@ -1,0 +1,130 @@
+Ruido entre corridas de la misma versión y tarea (desvío; en log para las métricas positivas, en proporción para el éxito)
+     exito  costo_usd  tokens_entrada  tokens_salida  pasos  duracion_s
+25%  0.322      0.184           0.245          0.120  0.147       0.193
+50%  0.363      0.203           0.268          0.138  0.173       0.232
+75%  0.381      0.247           0.300          0.165  0.192       0.267
+
+Validación: detección observada en los efectos plantados contra la que predice la fórmula
+n_tareas        metrica  tamano  observado  predicho
+      15      costo_usd    0.05      0.024     0.036
+      15      costo_usd    0.10      0.162     0.154
+      15      costo_usd    0.20      0.629     0.612
+      15      costo_usd    0.30      0.876     0.878
+      15      costo_usd    0.50      0.995     0.980
+      15     duracion_s    0.05      0.048     0.034
+      15     duracion_s    0.10      0.176     0.144
+      15     duracion_s    0.20      0.533     0.539
+      15     duracion_s    0.30      0.833     0.825
+      15     duracion_s    0.50      0.952     0.984
+      15          exito    0.05      0.010     0.018
+      15          exito    0.10      0.024     0.064
+      15          exito    0.20      0.181     0.261
+      15          exito    0.30      0.395     0.543
+      15          pasos    0.05      0.057     0.054
+      15          pasos    0.10      0.243     0.253
+      15          pasos    0.20      0.824     0.796
+      15          pasos    0.30      0.981     0.964
+      15          pasos    0.50      1.000     0.999
+      15 tokens_entrada    0.05      0.048     0.022
+      15 tokens_entrada    0.10      0.119     0.085
+      15 tokens_entrada    0.20      0.471     0.384
+      15 tokens_entrada    0.30      0.719     0.713
+      15 tokens_entrada    0.50      0.962     0.955
+      15  tokens_salida    0.05      0.133     0.088
+      15  tokens_salida    0.10      0.429     0.403
+      15  tokens_salida    0.20      0.900     0.873
+      15  tokens_salida    0.30      0.948     0.953
+      15  tokens_salida    0.50      0.990     0.983
+   todas      costo_usd    0.05      0.443     0.441
+   todas      costo_usd    0.10      0.938     0.925
+   todas      costo_usd    0.20      0.995     0.997
+   todas      costo_usd    0.30      1.000     1.000
+   todas      costo_usd    0.50      1.000     1.000
+   todas     duracion_s    0.05      0.410     0.388
+   todas     duracion_s    0.10      0.895     0.895
+   todas     duracion_s    0.20      1.000     1.000
+   todas     duracion_s    0.30      1.000     1.000
+   todas     duracion_s    0.50      1.000     1.000
+   todas          exito    0.05      0.114     0.160
+   todas          exito    0.10      0.524     0.653
+   todas          exito    0.20      0.995     0.998
+   todas          exito    0.30      1.000     1.000
+   todas          pasos    0.05      0.643     0.636
+   todas          pasos    0.10      0.981     0.983
+   todas          pasos    0.20      1.000     1.000
+   todas          pasos    0.30      1.000     1.000
+   todas          pasos    0.50      1.000     1.000
+   todas tokens_entrada    0.05      0.210     0.250
+   todas tokens_entrada    0.10      0.786     0.810
+   todas tokens_entrada    0.20      0.986     0.993
+   todas tokens_entrada    0.30      1.000     1.000
+   todas tokens_entrada    0.50      1.000     1.000
+   todas  tokens_salida    0.05      0.805     0.776
+   todas  tokens_salida    0.10      0.957     0.964
+   todas  tokens_salida    0.20      1.000     0.995
+   todas  tokens_salida    0.30      1.000     1.000
+   todas  tokens_salida    0.50      1.000     1.000
+Diferencia absoluta media: 0.019
+Por métrica: costo_usd 0.007; duracion_s 0.011; exito 0.057; pasos 0.007; tokens_entrada 0.023; tokens_salida 0.015
+
+Variación del efecto real entre tareas, en 42 pares de esfuerzo contiguo (mediana)
+                desvio_entre_tareas  relativo_al_efecto
+exito                         0.107               1.347
+costo_usd                     0.093               0.175
+tokens_entrada                0.119               0.207
+tokens_salida                 0.076               0.176
+pasos                         0.070               0.297
+duracion_s                    0.099               0.231
+
+Menor efecto detectado en el 80 % de los casos, con el ruido de la configuración mediana
+(corridas = total de las dos versiones; efecto variable = como varían entre tareas los cambios de esfuerzo)
+      escenario  tareas  repeticiones  corridas  exito costo_usd tokens_entrada tokens_salida pasos duracion_s
+  efecto parejo      10             2        40 49 pts      32 %           44 %          20 %  26 %       37 %
+  efecto parejo      10             3        60 40 pts      25 %           34 %          16 %  21 %       29 %
+  efecto parejo      10             5       100 31 pts      19 %           26 %          12 %  16 %       22 %
+  efecto parejo      10            10       200 22 pts      13 %           18 %           9 %  11 %       15 %
+  efecto parejo      15             2        60 37 pts      23 %           32 %          15 %  19 %       27 %
+  efecto parejo      15             3        90 30 pts      19 %           25 %          12 %  16 %       22 %
+  efecto parejo      15             5       150 24 pts      14 %           19 %           9 %  12 %       16 %
+  efecto parejo      15            10       300 17 pts      10 %           13 %           7 %   8 %       11 %
+  efecto parejo      20             2        80 31 pts      19 %           26 %          13 %  16 %       22 %
+  efecto parejo      20             3       120 25 pts      15 %           21 %          10 %  13 %       18 %
+  efecto parejo      20             5       200 20 pts      12 %           16 %           8 %  10 %       13 %
+  efecto parejo      20            10       400 14 pts       8 %           11 %           5 %   7 %        9 %
+  efecto parejo      30             2       120 24 pts      15 %           20 %          10 %  12 %       17 %
+  efecto parejo      30             3       180 20 pts      12 %           16 %           8 %  10 %       14 %
+  efecto parejo      30             5       300 15 pts       9 %           12 %           6 %   8 %       10 %
+  efecto parejo      30            10       600 11 pts       6 %            8 %           4 %   5 %        7 %
+  efecto parejo      50             2       200 18 pts      11 %           15 %           7 %   9 %       13 %
+  efecto parejo      50             3       300 15 pts       9 %           12 %           6 %   7 %       10 %
+  efecto parejo      50             5       500 12 pts       7 %            9 %           5 %   6 %        8 %
+  efecto parejo      50            10      1000  8 pts       5 %            6 %           3 %   4 %        5 %
+efecto variable      10             2        40 51 pts      35 %           49 %          24 %  29 %       41 %
+efecto variable      10             3        60 42 pts      29 %           40 %          20 %  24 %       33 %
+efecto variable      10             5       100 34 pts      24 %           32 %          17 %  19 %       27 %
+efecto variable      10            10       200 26 pts      19 %           26 %          14 %  15 %       21 %
+efecto variable      15             2        60 39 pts      26 %           35 %          18 %  21 %       30 %
+efecto variable      15             3        90 32 pts      22 %           29 %          15 %  18 %       25 %
+efecto variable      15             5       150 26 pts      18 %           24 %          13 %  14 %       20 %
+efecto variable      15            10       300 20 pts      14 %           19 %          11 %  11 %       16 %
+efecto variable      20             2        80 32 pts      21 %           29 %          14 %  17 %       24 %
+efecto variable      20             3       120 27 pts      18 %           24 %          12 %  14 %       20 %
+efecto variable      20             5       200 22 pts      15 %           19 %          10 %  12 %       16 %
+efecto variable      20            10       400 17 pts      12 %           16 %           9 %   9 %       13 %
+efecto variable      30             2       120 25 pts      16 %           22 %          11 %  13 %       19 %
+efecto variable      30             3       180 21 pts      14 %           18 %          10 %  11 %       16 %
+efecto variable      30             5       300 17 pts      11 %           15 %           8 %   9 %       13 %
+efecto variable      30            10       600 13 pts       9 %           12 %           7 %   7 %       10 %
+efecto variable      50             2       200 19 pts      12 %           16 %           8 %  10 %       14 %
+efecto variable      50             3       300 16 pts      10 %           13 %           7 %   8 %       11 %
+efecto variable      50             5       500 13 pts       8 %           11 %           6 %   7 %        9 %
+efecto variable      50            10      1000 10 pts       7 %            9 %           5 %   5 %        8 %
+
+Piloto con una sola versión: intervalo del 95 % del ruido estimado, relativo al real
+ tareas  repeticiones  corridas ic95_del_ruido
+      3            10        30  -21 % a +36 %
+      5             6        30  -22 % a +38 %
+      5            10        50  -17 % a +26 %
+      8             6        48  -18 % a +28 %
+     10             5        50  -18 % a +28 %
+     10            10       100  -13 % a +17 %

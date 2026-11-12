@@ -1,0 +1,268 @@
+Intervalos del 95 %: bootstrap de configuraciones (2000 réplicas) más jackknife de tareas
+(500 subconjuntos sin 23 de las 113 tareas).
+Los rivales, solo configuraciones. parte_tareas: qué parte de la varianza viene de las tareas.
+Comprobación: con las tareas sin remuestrear, el recálculo difiere de aa_deepswe.py en 0 de 90300 facts.
+
+Comparaciones A/A (grupo: diseño, cantidad de tareas)
+                                              medida                           grupo estimacion ic95_inf ic95_sup parte_tareas             criterio
+                       informes con algún fact falso          A/A equilibrado, todas      0.039    0.021    0.057        0.765                     
+                       informes con algún fact falso             A/A equilibrado, 15      0.032    0.013    0.051        0.745                     
+                       informes con algún fact falso A/A por orden de corrida, todas      0.443    0.280    0.606        0.485        supera el 5 %
+                                        facts falsos          A/A equilibrado, todas      0.013    0.005    0.020        0.764                     
+                                        facts falsos             A/A equilibrado, 15      0.014    0.005    0.022        0.702                     
+                                        facts falsos A/A por orden de corrida, todas      0.121    0.065    0.178        0.440                     
+                                           cobertura          A/A equilibrado, todas      0.951    0.939    0.962        0.699                     
+                                           cobertura             A/A equilibrado, 15      0.953    0.941    0.965        0.697                     
+                                           cobertura A/A por orden de corrida, todas      0.833    0.771    0.896        0.483 cubre menos del 95 %
+                                       equivalencias          A/A equilibrado, todas      0.802    0.777    0.827        0.373                     
+                                       equivalencias             A/A equilibrado, 15      0.228    0.194    0.262        0.261                     
+                                       equivalencias A/A por orden de corrida, todas      0.690    0.625    0.756        0.542                     
+informes con algún fact falso (diferencia de medias)          A/A equilibrado, todas      0.172    0.142    0.202        0.000                     
+informes con algún fact falso (diferencia de medias)             A/A equilibrado, 15      0.724    0.695    0.754        0.000                     
+informes con algún fact falso (diferencia de medias) A/A por orden de corrida, todas      0.343    0.233    0.453        0.000                     
+           informes con algún fact falso (agentrial)          A/A equilibrado, todas      0.000    0.000    0.000          nan                     
+           informes con algún fact falso (agentrial)             A/A equilibrado, 15      0.000    0.000    0.000          nan                     
+           informes con algún fact falso (agentrial) A/A por orden de corrida, todas      0.000    0.000    0.000          nan                     
+
+Sensibilidad: error estándar de las medidas principales del A/A equilibrado, por configuraciones
+y por tareas según cuántas tareas saca el jackknife
+                       medida                  grupo  estimacion  configuraciones  una_tarea    20%  la_mitad
+informes con algún fact falso A/A equilibrado, todas      0.0393           0.0045     0.0198 0.0080    0.0047
+informes con algún fact falso    A/A equilibrado, 15      0.0321           0.0049     0.0146 0.0083    0.0048
+                    cobertura A/A equilibrado, todas      0.9506           0.0032     0.0103 0.0048    0.0030
+                    cobertura    A/A equilibrado, 15      0.9530           0.0033     0.0079 0.0050    0.0031
+
+Efectos plantados (grupo: cantidad de tareas, métrica, tamaño)
+                          medida                       grupo estimacion ic95_inf ic95_sup parte_tareas criterio
+                       detección      todas, costo_usd, 0.05      0.443    0.336    0.550        0.561         
+                       detección         15, costo_usd, 0.05      0.024    0.000    0.062        0.725         
+                       detección      todas, costo_usd, 0.10      0.938    0.872    1.000        0.602         
+                       detección         15, costo_usd, 0.10      0.162    0.082    0.241        0.501         
+                       detección      todas, costo_usd, 0.20      0.995    0.974    1.000        0.798         
+                       detección         15, costo_usd, 0.20      0.629    0.505    0.752        0.556         
+                       detección      todas, costo_usd, 0.30      1.000    0.990    1.000        1.000         
+                       detección         15, costo_usd, 0.30      0.876    0.789    0.964        0.628         
+                       detección      todas, costo_usd, 0.50      1.000    1.000    1.000          nan         
+                       detección         15, costo_usd, 0.50      0.995    0.962    1.000        0.916         
+                       detección todas, tokens_entrada, 0.05      0.210    0.118    0.301        0.593         
+                       detección    15, tokens_entrada, 0.05      0.048    0.000    0.097        0.690         
+                       detección todas, tokens_entrada, 0.10      0.786    0.682    0.889        0.591         
+                       detección    15, tokens_entrada, 0.10      0.119    0.056    0.182        0.498         
+                       detección todas, tokens_entrada, 0.20      0.986    0.956    1.000        0.479         
+                       detección    15, tokens_entrada, 0.20      0.471    0.358    0.585        0.542         
+                       detección todas, tokens_entrada, 0.30      1.000    0.992    1.000        1.000         
+                       detección    15, tokens_entrada, 0.30      0.719    0.612    0.826        0.596         
+                       detección todas, tokens_entrada, 0.50      1.000    1.000    1.000          nan         
+                       detección    15, tokens_entrada, 0.50      0.962    0.897    1.000        0.709         
+                       detección  todas, tokens_salida, 0.05      0.805    0.697    0.913        0.506         
+                       detección     15, tokens_salida, 0.05      0.133    0.060    0.207        0.629         
+                       detección  todas, tokens_salida, 0.10      0.957    0.905    1.000        0.256         
+                       detección     15, tokens_salida, 0.10      0.429    0.320    0.537        0.516         
+                       detección  todas, tokens_salida, 0.20      1.000    0.982    1.000        1.000         
+                       detección     15, tokens_salida, 0.20      0.900    0.802    0.998        0.669         
+                       detección  todas, tokens_salida, 0.30      1.000    0.998    1.000        1.000         
+                       detección     15, tokens_salida, 0.30      0.948    0.892    1.000        0.516         
+                       detección  todas, tokens_salida, 0.50      1.000    1.000    1.000          nan         
+                       detección     15, tokens_salida, 0.50      0.990    0.966    1.000        0.699         
+                       detección          todas, pasos, 0.05      0.643    0.531    0.754        0.608         
+                       detección             15, pasos, 0.05      0.057    0.002    0.112        0.642         
+                       detección          todas, pasos, 0.10      0.981    0.949    1.000        0.694         
+                       detección             15, pasos, 0.10      0.243    0.148    0.337        0.474         
+                       detección          todas, pasos, 0.20      1.000    0.999    1.000        1.000         
+                       detección             15, pasos, 0.20      0.824    0.719    0.929        0.667         
+                       detección          todas, pasos, 0.30      1.000    1.000    1.000          nan         
+                       detección             15, pasos, 0.30      0.981    0.929    1.000        0.815         
+                       detección          todas, pasos, 0.50      1.000    1.000    1.000          nan         
+                       detección             15, pasos, 0.50      1.000    0.976    1.000        1.000         
+                       detección     todas, duracion_s, 0.05      0.410    0.305    0.514        0.457         
+                       detección        15, duracion_s, 0.05      0.048    0.004    0.091        0.514         
+                       detección     todas, duracion_s, 0.10      0.895    0.815    0.975        0.628         
+                       detección        15, duracion_s, 0.10      0.176    0.101    0.251        0.513         
+                       detección     todas, duracion_s, 0.20      1.000    0.990    1.000        1.000         
+                       detección        15, duracion_s, 0.20      0.533    0.424    0.643        0.432         
+                       detección     todas, duracion_s, 0.30      1.000    1.000    1.000          nan         
+                       detección        15, duracion_s, 0.30      0.833    0.747    0.919        0.571         
+                       detección     todas, duracion_s, 0.50      1.000    1.000    1.000          nan         
+                       detección        15, duracion_s, 0.50      0.952    0.897    1.000        0.706         
+                       detección          todas, exito, 0.05      0.114    0.044    0.185        0.619         
+                       detección             15, exito, 0.05      0.010    0.000    0.033        0.703         
+                       detección          todas, exito, 0.10      0.524    0.414    0.634        0.602         
+                       detección             15, exito, 0.10      0.024    0.000    0.058        0.635         
+                       detección          todas, exito, 0.20      0.995    0.961    1.000        0.930         
+                       detección             15, exito, 0.20      0.181    0.106    0.256        0.604         
+                       detección          todas, exito, 0.30      1.000    0.999    1.000        1.000         
+                       detección             15, exito, 0.30      0.395    0.286    0.504        0.627         
+detección (diferencia de medias)      todas, costo_usd, 0.05      0.038    0.014    0.062        0.000         
+detección (diferencia de medias)         15, costo_usd, 0.05      0.276    0.224    0.329        0.000         
+detección (diferencia de medias)      todas, costo_usd, 0.10      0.510    0.439    0.580        0.000         
+detección (diferencia de medias)         15, costo_usd, 0.10      0.490    0.417    0.564        0.000         
+detección (diferencia de medias)      todas, costo_usd, 0.20      0.990    0.977    1.000        0.000         
+detección (diferencia de medias)         15, costo_usd, 0.20      0.910    0.870    0.949        0.000         
+detección (diferencia de medias)      todas, costo_usd, 0.30      1.000    1.000    1.000          nan         
+detección (diferencia de medias)         15, costo_usd, 0.30      0.976    0.957    0.996        0.000         
+detección (diferencia de medias)      todas, costo_usd, 0.50      1.000    1.000    1.000          nan         
+detección (diferencia de medias)         15, costo_usd, 0.50      0.995    0.986    1.000        0.000         
+detección (diferencia de medias) todas, tokens_entrada, 0.05      0.071    0.038    0.105        0.000         
+detección (diferencia de medias)    15, tokens_entrada, 0.05      0.333    0.276    0.391        0.000         
+detección (diferencia de medias) todas, tokens_entrada, 0.10      0.457    0.393    0.521        0.000         
+detección (diferencia de medias)    15, tokens_entrada, 0.10      0.529    0.461    0.596        0.000         
+detección (diferencia de medias) todas, tokens_entrada, 0.20      0.962    0.933    0.991        0.000         
+detección (diferencia de medias)    15, tokens_entrada, 0.20      0.843    0.790    0.896        0.000         
+detección (diferencia de medias) todas, tokens_entrada, 0.30      1.000    1.000    1.000          nan         
+detección (diferencia de medias)    15, tokens_entrada, 0.30      0.938    0.899    0.977        0.000         
+detección (diferencia de medias) todas, tokens_entrada, 0.50      1.000    1.000    1.000          nan         
+detección (diferencia de medias)    15, tokens_entrada, 0.50      1.000    1.000    1.000          nan         
+detección (diferencia de medias)  todas, tokens_salida, 0.05      0.014    0.000    0.030        0.000         
+detección (diferencia de medias)     15, tokens_salida, 0.05      0.143    0.092    0.194        0.000         
+detección (diferencia de medias)  todas, tokens_salida, 0.10      0.538    0.468    0.608        0.000         
+detección (diferencia de medias)     15, tokens_salida, 0.10      0.510    0.444    0.575        0.000         
+detección (diferencia de medias)  todas, tokens_salida, 0.20      1.000    1.000    1.000          nan         
+detección (diferencia de medias)     15, tokens_salida, 0.20      0.976    0.953    0.999        0.000         
+detección (diferencia de medias)  todas, tokens_salida, 0.30      1.000    1.000    1.000          nan         
+detección (diferencia de medias)     15, tokens_salida, 0.30      0.995    0.986    1.000        0.000         
+detección (diferencia de medias)  todas, tokens_salida, 0.50      1.000    1.000    1.000          nan         
+detección (diferencia de medias)     15, tokens_salida, 0.50      1.000    1.000    1.000          nan         
+detección (diferencia de medias)          todas, pasos, 0.05      0.014    0.000    0.030        0.000         
+detección (diferencia de medias)             15, pasos, 0.05      0.152    0.106    0.199        0.000         
+detección (diferencia de medias)          todas, pasos, 0.10      0.519    0.460    0.579        0.000         
+detección (diferencia de medias)             15, pasos, 0.10      0.500    0.433    0.567        0.000         
+detección (diferencia de medias)          todas, pasos, 0.20      0.995    0.986    1.000        0.000         
+detección (diferencia de medias)             15, pasos, 0.20      0.962    0.937    0.987        0.000         
+detección (diferencia de medias)          todas, pasos, 0.30      1.000    1.000    1.000          nan         
+detección (diferencia de medias)             15, pasos, 0.30      1.000    1.000    1.000          nan         
+detección (diferencia de medias)          todas, pasos, 0.50      1.000    1.000    1.000          nan         
+detección (diferencia de medias)             15, pasos, 0.50      1.000    1.000    1.000          nan         
+detección (diferencia de medias)     todas, duracion_s, 0.05      0.067    0.031    0.103        0.000         
+detección (diferencia de medias)        15, duracion_s, 0.05      0.219    0.160    0.278        0.000         
+detección (diferencia de medias)     todas, duracion_s, 0.10      0.538    0.475    0.601        0.000         
+detección (diferencia de medias)        15, duracion_s, 0.10      0.510    0.444    0.575        0.000         
+detección (diferencia de medias)     todas, duracion_s, 0.20      0.981    0.959    1.000        0.000         
+detección (diferencia de medias)        15, duracion_s, 0.20      0.900    0.854    0.946        0.000         
+detección (diferencia de medias)     todas, duracion_s, 0.30      1.000    1.000    1.000          nan         
+detección (diferencia de medias)        15, duracion_s, 0.30      0.971    0.950    0.993        0.000         
+detección (diferencia de medias)     todas, duracion_s, 0.50      1.000    1.000    1.000          nan         
+detección (diferencia de medias)        15, duracion_s, 0.50      0.981    0.959    1.000        0.000         
+detección (diferencia de medias)          todas, exito, 0.05      0.529    0.459    0.598        0.000         
+detección (diferencia de medias)             15, exito, 0.05      0.505    0.441    0.569        0.000         
+detección (diferencia de medias)          todas, exito, 0.10      0.929    0.897    0.960        0.000         
+detección (diferencia de medias)             15, exito, 0.10      0.705    0.651    0.759        0.000         
+detección (diferencia de medias)          todas, exito, 0.20      1.000    1.000    1.000          nan         
+detección (diferencia de medias)             15, exito, 0.20      0.971    0.949    0.994        0.000         
+detección (diferencia de medias)          todas, exito, 0.30      1.000    1.000    1.000          nan         
+detección (diferencia de medias)             15, exito, 0.30      0.995    0.986    1.000        0.000         
+   cobertura del efecto plantado      todas, costo_usd, 0.05      0.938    0.883    0.993        0.652         
+   cobertura del efecto plantado         15, costo_usd, 0.05      0.957    0.905    1.000        0.702         
+   cobertura del efecto plantado      todas, costo_usd, 0.10      0.948    0.896    1.000        0.709         
+   cobertura del efecto plantado         15, costo_usd, 0.10      0.948    0.895    1.000        0.645         
+   cobertura del efecto plantado      todas, costo_usd, 0.20      0.976    0.930    1.000        0.818         
+   cobertura del efecto plantado         15, costo_usd, 0.20      0.962    0.910    1.000        0.685         
+   cobertura del efecto plantado      todas, costo_usd, 0.30      0.943    0.887    0.999        0.658         
+   cobertura del efecto plantado         15, costo_usd, 0.30      0.929    0.870    0.987        0.664         
+   cobertura del efecto plantado      todas, costo_usd, 0.50      0.962    0.912    1.000        0.744         
+   cobertura del efecto plantado         15, costo_usd, 0.50      0.952    0.904    1.000        0.695         
+   cobertura del efecto plantado todas, tokens_entrada, 0.05      0.948    0.889    1.000        0.708         
+   cobertura del efecto plantado    15, tokens_entrada, 0.05      0.919    0.852    0.987        0.706         
+   cobertura del efecto plantado todas, tokens_entrada, 0.10      0.938    0.881    0.996        0.614         
+   cobertura del efecto plantado    15, tokens_entrada, 0.10      0.943    0.888    0.998        0.714         
+   cobertura del efecto plantado todas, tokens_entrada, 0.20      0.924    0.863    0.984        0.706         
+   cobertura del efecto plantado    15, tokens_entrada, 0.20      0.943    0.884    1.000        0.637         
+   cobertura del efecto plantado todas, tokens_entrada, 0.30      0.933    0.872    0.994        0.564         
+   cobertura del efecto plantado    15, tokens_entrada, 0.30      0.943    0.889    0.996        0.697         
+   cobertura del efecto plantado todas, tokens_entrada, 0.50      0.948    0.893    1.000        0.734         
+   cobertura del efecto plantado    15, tokens_entrada, 0.50      0.971    0.923    1.000        0.796         
+   cobertura del efecto plantado  todas, tokens_salida, 0.05      0.948    0.895    1.000        0.652         
+   cobertura del efecto plantado     15, tokens_salida, 0.05      0.919    0.859    0.979        0.596         
+   cobertura del efecto plantado  todas, tokens_salida, 0.10      0.962    0.910    1.000        0.782         
+   cobertura del efecto plantado     15, tokens_salida, 0.10      0.976    0.929    1.000        0.819         
+   cobertura del efecto plantado  todas, tokens_salida, 0.20      0.943    0.890    0.996        0.692         
+   cobertura del efecto plantado     15, tokens_salida, 0.20      0.952    0.897    1.000        0.587         
+   cobertura del efecto plantado  todas, tokens_salida, 0.30      0.957    0.906    1.000        0.753         
+   cobertura del efecto plantado     15, tokens_salida, 0.30      0.948    0.899    0.996        0.661         
+   cobertura del efecto plantado  todas, tokens_salida, 0.50      0.943    0.886    1.000        0.732         
+   cobertura del efecto plantado     15, tokens_salida, 0.50      0.948    0.895    1.000        0.702         
+   cobertura del efecto plantado          todas, pasos, 0.05      0.938    0.885    0.991        0.679         
+   cobertura del efecto plantado             15, pasos, 0.05      0.933    0.873    0.994        0.651         
+   cobertura del efecto plantado          todas, pasos, 0.10      0.952    0.903    1.000        0.693         
+   cobertura del efecto plantado             15, pasos, 0.10      0.962    0.912    1.000        0.756         
+   cobertura del efecto plantado          todas, pasos, 0.20      0.957    0.902    1.000        0.721         
+   cobertura del efecto plantado             15, pasos, 0.20      0.952    0.899    1.000        0.734         
+   cobertura del efecto plantado          todas, pasos, 0.30      0.943    0.885    1.000        0.684         
+   cobertura del efecto plantado             15, pasos, 0.30      0.938    0.882    0.994        0.658         
+   cobertura del efecto plantado          todas, pasos, 0.50      0.962    0.911    1.000        0.769         
+   cobertura del efecto plantado             15, pasos, 0.50      0.952    0.900    1.000        0.722         
+   cobertura del efecto plantado     todas, duracion_s, 0.05      0.962    0.915    1.000        0.639         
+   cobertura del efecto plantado        15, duracion_s, 0.05      0.952    0.902    1.000        0.705         
+   cobertura del efecto plantado     todas, duracion_s, 0.10      0.957    0.902    1.000        0.722         
+   cobertura del efecto plantado        15, duracion_s, 0.10      0.929    0.874    0.983        0.620         
+   cobertura del efecto plantado     todas, duracion_s, 0.20      0.943    0.888    0.997        0.705         
+   cobertura del efecto plantado        15, duracion_s, 0.20      0.957    0.911    1.000        0.669         
+   cobertura del efecto plantado     todas, duracion_s, 0.30      0.952    0.900    1.000        0.659         
+   cobertura del efecto plantado        15, duracion_s, 0.30      0.971    0.920    1.000        0.810         
+   cobertura del efecto plantado     todas, duracion_s, 0.50      0.929    0.868    0.989        0.729         
+   cobertura del efecto plantado        15, duracion_s, 0.50      0.933    0.873    0.994        0.649         
+   cobertura del efecto plantado          todas, exito, 0.05      0.967    0.915    1.000        0.796         
+   cobertura del efecto plantado             15, exito, 0.05      0.938    0.883    0.994        0.719         
+   cobertura del efecto plantado          todas, exito, 0.10      0.952    0.897    1.000        0.748         
+   cobertura del efecto plantado             15, exito, 0.10      0.948    0.898    0.997        0.600         
+   cobertura del efecto plantado          todas, exito, 0.20      0.976    0.935    1.000        0.772         
+   cobertura del efecto plantado             15, exito, 0.20      0.967    0.924    1.000        0.689         
+   cobertura del efecto plantado          todas, exito, 0.30      0.957    0.906    1.000        0.742         
+   cobertura del efecto plantado             15, exito, 0.30      0.957    0.911    1.000        0.683         
+            equivalencias falsas      todas, costo_usd, 0.05      0.000    0.000    0.000          nan         
+            equivalencias falsas         15, costo_usd, 0.05      0.000    0.000    0.000          nan         
+            equivalencias falsas      todas, costo_usd, 0.10      0.000    0.000    0.000          nan         
+            equivalencias falsas         15, costo_usd, 0.10      0.000    0.000    0.000          nan         
+            equivalencias falsas      todas, costo_usd, 0.20      0.000    0.000    0.000          nan         
+            equivalencias falsas         15, costo_usd, 0.20      0.000    0.000    0.003        1.000         
+            equivalencias falsas      todas, costo_usd, 0.30      0.000    0.000    0.000          nan         
+            equivalencias falsas         15, costo_usd, 0.30      0.000    0.000    0.002        1.000         
+            equivalencias falsas      todas, costo_usd, 0.50      0.000    0.000    0.000          nan         
+            equivalencias falsas         15, costo_usd, 0.50      0.000    0.000    0.000          nan         
+            equivalencias falsas todas, tokens_entrada, 0.05      0.000    0.000    0.000          nan         
+            equivalencias falsas    15, tokens_entrada, 0.05      0.000    0.000    0.000          nan         
+            equivalencias falsas todas, tokens_entrada, 0.10      0.000    0.000    0.000          nan         
+            equivalencias falsas    15, tokens_entrada, 0.10      0.000    0.000    0.000          nan         
+            equivalencias falsas todas, tokens_entrada, 0.20      0.000    0.000    0.001        1.000         
+            equivalencias falsas    15, tokens_entrada, 0.20      0.000    0.000    0.008        1.000         
+            equivalencias falsas todas, tokens_entrada, 0.30      0.000    0.000    0.000          nan         
+            equivalencias falsas    15, tokens_entrada, 0.30      0.000    0.000    0.001        1.000         
+            equivalencias falsas todas, tokens_entrada, 0.50      0.000    0.000    0.000          nan         
+            equivalencias falsas    15, tokens_entrada, 0.50      0.000    0.000    0.000          nan         
+            equivalencias falsas  todas, tokens_salida, 0.05      0.000    0.000    0.000          nan         
+            equivalencias falsas     15, tokens_salida, 0.05      0.000    0.000    0.000          nan         
+            equivalencias falsas  todas, tokens_salida, 0.10      0.000    0.000    0.000          nan         
+            equivalencias falsas     15, tokens_salida, 0.10      0.000    0.000    0.000          nan         
+            equivalencias falsas  todas, tokens_salida, 0.20      0.000    0.000    0.000          nan         
+            equivalencias falsas     15, tokens_salida, 0.20      0.000    0.000    0.005        1.000         
+            equivalencias falsas  todas, tokens_salida, 0.30      0.000    0.000    0.000          nan         
+            equivalencias falsas     15, tokens_salida, 0.30      0.000    0.000    0.000          nan         
+            equivalencias falsas  todas, tokens_salida, 0.50      0.000    0.000    0.000          nan         
+            equivalencias falsas     15, tokens_salida, 0.50      0.000    0.000    0.000          nan         
+            equivalencias falsas          todas, pasos, 0.05      0.000    0.000    0.000          nan         
+            equivalencias falsas             15, pasos, 0.05      0.000    0.000    0.000          nan         
+            equivalencias falsas          todas, pasos, 0.10      0.000    0.000    0.000          nan         
+            equivalencias falsas             15, pasos, 0.10      0.000    0.000    0.000          nan         
+            equivalencias falsas          todas, pasos, 0.20      0.000    0.000    0.000          nan         
+            equivalencias falsas             15, pasos, 0.20      0.000    0.000    0.005        1.000         
+            equivalencias falsas          todas, pasos, 0.30      0.000    0.000    0.000          nan         
+            equivalencias falsas             15, pasos, 0.30      0.000    0.000    0.000          nan         
+            equivalencias falsas          todas, pasos, 0.50      0.000    0.000    0.000          nan         
+            equivalencias falsas             15, pasos, 0.50      0.000    0.000    0.000          nan         
+            equivalencias falsas     todas, duracion_s, 0.05      0.000    0.000    0.000          nan         
+            equivalencias falsas        15, duracion_s, 0.05      0.000    0.000    0.000          nan         
+            equivalencias falsas     todas, duracion_s, 0.10      0.000    0.000    0.000          nan         
+            equivalencias falsas        15, duracion_s, 0.10      0.000    0.000    0.000          nan         
+            equivalencias falsas     todas, duracion_s, 0.20      0.000    0.000    0.000          nan         
+            equivalencias falsas        15, duracion_s, 0.20      0.000    0.000    0.006        1.000         
+            equivalencias falsas     todas, duracion_s, 0.30      0.000    0.000    0.000          nan         
+            equivalencias falsas        15, duracion_s, 0.30      0.000    0.000    0.000          nan         
+            equivalencias falsas     todas, duracion_s, 0.50      0.000    0.000    0.000          nan         
+            equivalencias falsas        15, duracion_s, 0.50      0.000    0.000    0.000          nan         
+            equivalencias falsas          todas, exito, 0.05      0.000    0.000    0.010        1.000         
+            equivalencias falsas             15, exito, 0.05      0.005    0.000    0.027        0.818         
+            equivalencias falsas          todas, exito, 0.10      0.000    0.000    0.002        1.000         
+            equivalencias falsas             15, exito, 0.10      0.000    0.000    0.008        1.000         
+            equivalencias falsas          todas, exito, 0.20      0.000    0.000    0.000          nan         
+            equivalencias falsas             15, exito, 0.20      0.000    0.000    0.006        1.000         
+            equivalencias falsas          todas, exito, 0.30      0.000    0.000    0.000          nan         
+            equivalencias falsas             15, exito, 0.30      0.000    0.000    0.002        1.000         

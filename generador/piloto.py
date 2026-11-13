@@ -87,6 +87,9 @@ def main(carpeta):
     azar = {n: sorteos(n, rng) for n in TAREAS}
     plan = menor_efecto_por_diseno(desvios.desvio, tau, TAREAS, REPETICIONES, azar)
     plan.insert(4, 'presupuesto_usd', (plan.corridas * corridas.costo_usd.mean()).round())
+    # Una métrica que no varió (por ejemplo, éxito siempre 1) no tiene ruido medible: el cero no dice nada.
+    for m in desvios.index[desvios.desvio == 0]:
+        plan.loc[plan.escenario == 'efecto parejo', m] = 'sin variación'
 
     pd.set_option('display.width', 200)
     resumen = '\n'.join([

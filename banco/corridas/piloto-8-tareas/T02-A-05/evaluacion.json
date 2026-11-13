@@ -1,0 +1,21 @@
+{
+  "tarea": "T02-filtrar-clases",
+  "tests": 12,
+  "pasados": 12,
+  "exito": true,
+  "pasaron": [
+    "test_sin_parametros_lista_igual_que_antes_y_trae_el_total",
+    "test_paginas",
+    "test_pagina_despues_del_final_esta_vacia",
+    "test_rangos_de_paginacion_invalidos",
+    "test_el_dia_se_cuenta_en_hora_de_montevideo",
+    "test_los_extremos_se_incluyen",
+    "test_desde_y_hasta_por_separado",
+    "test_instructor_exacto_sin_mayusculas",
+    "test_con_lugar",
+    "test_nunca_lista_las_que_ya_empezaron",
+    "test_filtros_combinados_y_total_antes_de_paginar",
+    "test_fechas_invalidas"
+  ],
+  "fallidos": []
+}

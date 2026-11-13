@@ -1,0 +1,25 @@
+{
+  "tarea": "T07-compra-de-creditos",
+  "tests": 16,
+  "pasados": 16,
+  "exito": true,
+  "pasaron": [
+    "test_pack_que_no_esta_en_el_catalogo_da_422",
+    "test_la_compra_queda_pendiente_con_la_url_de_pago",
+    "test_crea_el_pago_con_la_clave_y_la_idempotency_key",
+    "test_si_cobra_falla_al_crear_el_pago_da_502_y_la_compra_queda_pendiente",
+    "test_webhook_aprobado_suma_los_creditos_y_manda_el_correo",
+    "test_webhook_no_usa_lo_que_dice_el_cuerpo",
+    "test_webhook_rechazado_marca_la_compra_sin_sumar_creditos",
+    "test_cada_compra_suma_sus_creditos_una_sola_vez",
+    "test_webhook_da_503_si_cobra_falla",
+    "test_webhook_encuentra_la_compra_que_quedo_sin_pago",
+    "test_conciliar_pide_clave_de_admin",
+    "test_la_conciliacion_aplica_el_estado_de_cobra_a_las_compras_de_todos",
+    "test_la_conciliacion_busca_por_referencia_la_compra_que_quedo_sin_pago",
+    "test_la_compra_sin_pago_se_rechaza_a_los_30_minutos",
+    "test_una_falla_de_cobra_no_frena_la_conciliacion",
+    "test_lista_solo_las_compras_del_socio"
+  ],
+  "fallidos": []
+}

@@ -39,6 +39,7 @@ T06 a T08 se sumaron el 9/11/2026 para tener tareas más grandes y difíciles, y
 ```
 python3.11 -m venv .venv
 .venv/bin/pip install -r app/requirements.txt
+npm install    # Claude Code 2.1.312, la versión fija para las corridas
 .venv/bin/python herramientas/verificar.py
 .venv/bin/python herramientas/evaluar.py T01-cancelar-reserva /ruta/al/repo
 ```
@@ -81,12 +82,36 @@ export ANTHROPIC_API_KEY=...
 .venv/bin/python herramientas/corredor.py experimentos/piloto.json
 ```
 
-Con el Claude Code real todavía falta comprobar cuatro cosas, y la corrida de `humo` sirve para eso:
+La versión de Claude Code queda fijada en `package.json` y el corredor la usa por defecto (`node_modules/.bin/claude`), así no depende de la que tenga instalada cada máquina.
+
+Con el Claude Code real hay que comprobar cuatro cosas, y la corrida de `humo` sirve para eso:
 
 - que en modo `--bare` mande la telemetría;
 - que lleguen los tramos de la traza con el id de la corrida (`tramos_otel` mayor que cero y `tramos_de_otra_traza` en cero);
 - que el resultado traiga los campos que lee el adaptador;
 - que con estos permisos el agente pueda correr los tests.
+
+## Piloto (13/11/2026)
+
+Se corrieron las 8 tareas 6 veces cada una con la versión A (`experimentos/piloto-8-tareas.json`, Claude Code 2.1.312 y Sonnet 5.5). El resumen completo está en `generador/resultados/piloto_piloto-8-tareas.txt` y las corridas, en `corridas/piloto-8-tareas/`.
+
+- **Controles.** Las 48 corridas terminaron bien. Todas mandaron telemetría y trazas, y ninguna tocó el banco.
+- **Costo y tiempo.** 6,23 dólares en total: 0,13 por corrida en promedio (0,09 en T01 a T05 y de 0,15 a 0,23 en T06 a T08). Cada corrida tarda unos 52 segundos.
+- **Éxito.** Las 8 tareas se resolvieron en todas las corridas. Con este agente el éxito no distingue versiones: hacen falta tareas más difíciles, con éxito entre 20 % y 80 %, o declararlo como límite.
+- **Ruido entre corridas.** Es menor que en DeepSWE en todas las métricas continuas. El desvío en escala log es 0,107 en costo (DeepSWE: 0,203), 0,094 en duración (0,232), 0,117 en tokens de salida (0,138), 0,148 en pasos (0,173) y 0,220 en tokens de entrada (0,268).
+- **Qué se puede detectar.** Con 15 tareas y 5 corridas por versión (150 corridas, unos 19 dólares por comparación), el generador detectaría en el 80 % de los casos cambios de 7 % a 12 % en el costo, de 8 % a 11 % en los tokens de salida y de 6 % a 13 % en la duración. Cada rango va del efecto parejo entre tareas al variable.
+
+## Primera corrida de humo (12/11/2026)
+
+Se corrió T01 una vez con el Claude Code de la máquina (2.1.258), con la versión A:
+- **Resultado:** pasó los 11 tests ocultos en 46 segundos, por 0,32 dólares y en 9 turnos.
+- **Controles:** usó la clave de ANTHROPIC_API_KEY. Llegaron 25 eventos y 29 tramos de traza, todos con el id de la corrida. No tocó el banco.
+
+Salieron dos problemas, que se corrigieron antes del piloto:
+- **No corrió los tests.** Le negaron un comando de Python con heredoc y entendió que tenía prohibida toda la terminal. La plantilla ahora dice qué comandos puede usar.
+- **Esa versión no reconoce el modelo Sonnet 5.5** (avisa `unrecognized_model`), así que su costo estimado puede no ser exacto. El banco ahora usa su propia versión fija, la 2.1.312, la misma que usa Rootshift en el lab.
+
+La corrida quedó en `corridas/humo-2.1.258/`.
 
 ## Prueba ciega (3/11/2026)
 
@@ -97,5 +122,4 @@ La prueba sacó a la luz una ambigüedad en T02: el pedido decía que no había 
 ## Pendiente
 
 - Confirmar la clasificación con el documento de la taxonomía (`docs/classifying-capabilities.md` de Rootshift) cuando Anthony dé acceso.
-- Correr `humo` con la clave de la tesis y, si está todo bien, el piloto. `piloto-8-tareas.json` es la variante con las ocho tareas y seis corridas cada una (48 corridas); mide la dificultad de las nuevas por el mismo costo.
-- Sumar las tareas del benchmark público y, si el piloto muestra que alguna se resuelve siempre, otras más difíciles.
+- Llegar a 15 tareas con tareas más difíciles, porque en el piloto todas se resolvieron siempre. Pueden salir del benchmark público.

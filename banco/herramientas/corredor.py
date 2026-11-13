@@ -5,7 +5,8 @@ Uso:
   python corredor.py experimentos/piloto.json --plan      solo muestra el orden de las corridas
   python corredor.py experimentos/prueba.json --claude "python herramientas/pruebas/claude_falso.py"
 
-Necesita la clave de la tesis en ANTHROPIC_API_KEY. Claude Code corre en modo --bare, que no lee
+Usa la versión de Claude Code fijada en package.json (npm install en banco/), o la del sistema si no
+está instalada. Necesita la clave de la tesis en ANTHROPIC_API_KEY. Claude Code corre en modo --bare, que no lee
 la configuración de ~/.claude (ni CLAUDE.md, ni hooks, ni MCP, ni otras claves), así el entorno es
 el mismo en cada corrida y en cada máquina.
 
@@ -36,6 +37,7 @@ from evaluar import BANCO, TAREAS, evaluar
 from otel import Receptor
 
 PYTHON_BANCO = BANCO / '.venv' / 'bin' / 'python'
+CLAUDE_BANCO = BANCO / 'node_modules' / '.bin' / 'claude'
 GIT = ['git', '-c', 'user.name=banco', '-c', 'user.email=banco@example.com']
 
 
@@ -160,7 +162,8 @@ def main():
     p = argparse.ArgumentParser()
     p.add_argument('experimento')
     p.add_argument('--plan', action='store_true', help='solo muestra el orden de las corridas')
-    p.add_argument('--claude', default='claude', help='comando de Claude Code (o uno falso para probar)')
+    p.add_argument('--claude', default=shlex.quote(str(CLAUDE_BANCO)) if CLAUDE_BANCO.exists() else 'claude',
+                   help='comando de Claude Code (o uno falso para probar)')
     p.add_argument('--conservar-repos', action='store_true', help='no borra el repo de cada corrida')
     args = p.parse_args()
 

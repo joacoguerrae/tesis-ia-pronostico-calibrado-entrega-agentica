@@ -1,0 +1,22 @@
+{
+  "tarea": "T04-alta-de-socios",
+  "tests": 13,
+  "pasados": 13,
+  "exito": true,
+  "pasaron": [
+    "test_alta_basico",
+    "test_alta_premium",
+    "test_el_token_sirve_para_autenticarse",
+    "test_tokens_distintos",
+    "test_normaliza_nombre_y_email",
+    "test_email_repetido",
+    "test_emails_invalidos",
+    "test_emails_validos_en_el_borde",
+    "test_largo_del_nombre",
+    "test_plan_invalido",
+    "test_faltan_datos",
+    "test_correo_de_bienvenida",
+    "test_un_alta_rechazada_no_crea_socio_ni_manda_correo"
+  ],
+  "fallidos": []
+}

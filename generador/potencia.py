@@ -34,7 +34,9 @@ def potencia(efecto, desvio, n, azar):
 
 
 def efecto_minimo(desvio, n, azar):
-    """Menor efecto con potencia de al menos 80 %, por bisección."""
+    """Menor efecto con potencia de al menos 80 %, por bisección. Sin ruido, cualquier efecto se detecta."""
+    if desvio == 0:
+        return 0.0
     bajo, alto = 0.0, 10 * desvio / np.sqrt(n)
     for _ in range(40):
         medio = (bajo + alto) / 2

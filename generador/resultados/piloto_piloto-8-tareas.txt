@@ -1,0 +1,69 @@
+Piloto: piloto-8-tareas
+
+Controles del corredor
+corridas                                                             48
+tareas                                                                8
+versiones                                                             1
+terminaron con error o en un tope (resultado distinto de success)     0
+cortadas por tiempo                                                   0
+sin tramos de traza                                                   0
+tocaron el banco                                                      0
+
+Dificultad por tarea (informativa: éxito entre 20% y 80%)
+                        corridas  exito  costo_medio  duracion_media_s  informativa
+tarea                                                                              
+T01-cancelar-reserva           6    1.0        0.091            35.250        False
+T02-filtrar-clases             6    1.0        0.088            35.067        False
+T03-exportar-ocupacion         6    1.0        0.091            37.317        False
+T04-alta-de-socios             6    1.0        0.086            35.283        False
+T05-recordatorios              6    1.0        0.086            35.367        False
+T06-lista-de-espera            6    1.0        0.226            91.500        False
+T07-compra-de-creditos         6    1.0        0.226            88.117        False
+T08-convenios                  6    1.0        0.145            58.467        False
+Tareas informativas para el éxito: 0 de 8
+
+Por corrida (promedio, mediana y máximo)
+      costo_usd  duracion_s  tokens_entrada  tokens_salida   pasos
+mean      0.130      52.046        82335.75       8148.729   6.729
+50%       0.097      38.400        54526.00       5857.000   6.000
+max       0.258     103.100       232518.00      16693.000  12.000
+Costo total del piloto: 6.23 dólares
+
+Ruido entre corridas de la misma tarea (desvío; en log para las métricas positivas, en proporción
+para el éxito), con la mediana de las configuraciones de DeepSWE para comparar
+                desvio           ic95  gl  deepswe
+metrica                                           
+exito            0.000  0.000 a 0.000  40    0.363
+costo_usd        0.107  0.088 a 0.137  40    0.203
+tokens_entrada   0.220  0.180 a 0.281  40    0.268
+tokens_salida    0.117  0.096 a 0.149  40    0.138
+pasos            0.148  0.122 a 0.190  40    0.173
+duracion_s       0.094  0.077 a 0.121  40    0.232
+
+Menor efecto detectado en el 80 % de los casos y costo de una comparación (A y B).
+Efecto parejo: optimista; efecto variable: con la variación entre tareas de DeepSWE, pesimista.
+      escenario  tareas  repeticiones  corridas  presupuesto_usd         exito costo_usd tokens_entrada tokens_salida pasos duracion_s
+  efecto parejo      10             3        60              8.0 sin variación      13 %           28 %          14 %  18 %       11 %
+  efecto parejo      10             5       100             13.0 sin variación      10 %           21 %          11 %  14 %        8 %
+  efecto parejo      10            10       200             26.0 sin variación       7 %           14 %           7 %   9 %        6 %
+  efecto parejo      15             3        90             12.0 sin variación       9 %           20 %          10 %  13 %        8 %
+  efecto parejo      15             5       150             19.0 sin variación       7 %           15 %           8 %  10 %        6 %
+  efecto parejo      15            10       300             39.0 sin variación       5 %           11 %           5 %   7 %        4 %
+  efecto parejo      20             3       120             16.0 sin variación       8 %           16 %           8 %  11 %        7 %
+  efecto parejo      20             5       200             26.0 sin variación       6 %           12 %           6 %   8 %        5 %
+  efecto parejo      20            10       400             52.0 sin variación       4 %            9 %           5 %   6 %        4 %
+  efecto parejo      30             3       180             23.0 sin variación       6 %           13 %           7 %   9 %        5 %
+  efecto parejo      30             5       300             39.0 sin variación       5 %           10 %           5 %   7 %        4 %
+  efecto parejo      30            10       600             78.0 sin variación       3 %            7 %           4 %   5 %        3 %
+efecto variable      10             3        60              8.0        15 pts      19 %           34 %          18 %  21 %       19 %
+efecto variable      10             5       100             13.0        15 pts      17 %           28 %          15 %  17 %       17 %
+efecto variable      10            10       200             26.0        15 pts      15 %           23 %          13 %  14 %       16 %
+efecto variable      15             3        90             12.0        11 pts      14 %           25 %          13 %  15 %       14 %
+efecto variable      15             5       150             19.0        11 pts      12 %           21 %          11 %  13 %       13 %
+efecto variable      15            10       300             39.0        11 pts      11 %           17 %          10 %  10 %       12 %
+efecto variable      20             3       120             16.0         9 pts      11 %           20 %          11 %  13 %       11 %
+efecto variable      20             5       200             26.0         9 pts      10 %           17 %           9 %  10 %       10 %
+efecto variable      20            10       400             52.0         9 pts       9 %           14 %           8 %   9 %       10 %
+efecto variable      30             3       180             23.0         7 pts       9 %           16 %           9 %  10 %        9 %
+efecto variable      30             5       300             39.0         7 pts       8 %           13 %           7 %   8 %        8 %
+efecto variable      30            10       600             78.0         7 pts       7 %           11 %           6 %   7 %        8 %

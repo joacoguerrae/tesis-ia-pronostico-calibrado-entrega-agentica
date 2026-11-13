@@ -1,0 +1,172 @@
+diff --git a/README.md b/README.md
+index 5e8695a..1cee7fc 100644
+--- a/README.md
++++ b/README.md
+@@ -34,5 +34,6 @@ python -m pytest
+ | GET | `/clases/{id}` | Una clase. |
+ | POST | `/admin/clases` | Crea una clase (admin). |
+ | POST | `/reservas` | Reserva una clase: descuenta un crédito y manda el correo de confirmación. |
++| POST | `/reservas/{id}/cancelar` | Cancela una reserva propia. Con 2 h o más de anticipación devuelve el crédito; la reserva queda `cancelada`. |
+ | GET | `/reservas` | Reservas del socio, ordenadas por el inicio de la clase. |
+ | GET | `/yo` | Datos del socio y créditos que le quedan. |
+diff --git a/pulso/db.py b/pulso/db.py
+index 59841ac..7259995 100644
+--- a/pulso/db.py
++++ b/pulso/db.py
+@@ -134,5 +134,19 @@ def sumar_creditos(socio_id, cantidad):
+         con.execute('UPDATE socios SET creditos = creditos + ? WHERE id = ?', (cantidad, socio_id))
+ 
+ 
++def cancelar_reserva(reserva_id, devolver_credito):
++    """Pasa la reserva a 'cancelada' y, si corresponde, devuelve el crédito, todo en una transacción.
++    Devuelve False si la reserva ya no estaba confirmada (no cambia nada)."""
++    with conexion() as con:
++        cur = con.execute("UPDATE reservas SET estado = 'cancelada' WHERE id = ? AND estado = 'confirmada'",
++                          (reserva_id,))
++        if cur.rowcount == 0:
++            return False
++        if devolver_credito:
++            con.execute('UPDATE socios SET creditos = creditos + 1 '
++                        'WHERE id = (SELECT socio_id FROM reservas WHERE id = ?)', (reserva_id,))
++    return True
++
++
+ def correos():
+     return _varias('SELECT * FROM correos ORDER BY id')
+diff --git a/pulso/main.py b/pulso/main.py
+index 039212d..c80ec3b 100644
+--- a/pulso/main.py
++++ b/pulso/main.py
+@@ -1,4 +1,5 @@
+ import os
++from datetime import timedelta
+ 
+ from fastapi import APIRouter, Depends, FastAPI, Header, HTTPException
+ from pydantic import AwareDatetime, BaseModel, Field
+@@ -82,6 +83,26 @@ def reservar(datos: NuevaReserva, socio=Depends(socio_actual)):
+     return ver_reserva(reserva)
+ 
+ 
++ANTICIPO_MINIMO = timedelta(hours=2)
++
++
++@router.post('/reservas/{reserva_id}/cancelar')
++def cancelar(reserva_id: int, socio=Depends(socio_actual)):
++    reserva = db.reserva(reserva_id)
++    if reserva is None or reserva['socio_id'] != socio['id']:
++        raise HTTPException(404, 'No existe la reserva')
++    if reserva['estado'] == 'cancelada':
++        raise HTTPException(409, 'La reserva ya está cancelada')
++    inicio = db.a_fecha(db.clase(reserva['clase_id'])['inicio'])
++    ahora = reloj.ahora()
++    if ahora >= inicio:
++        raise HTTPException(409, 'La clase ya empezó')
++    devolver = inicio - ahora >= ANTICIPO_MINIMO
++    if not db.cancelar_reserva(reserva['id'], devolver):
++        raise HTTPException(409, 'La reserva ya está cancelada')
++    return dict(ver_reserva(db.reserva(reserva['id'])), credito_devuelto=devolver)
++
++
+ @router.get('/reservas')
+ def mis_reservas(socio=Depends(socio_actual)):
+     return [ver_reserva(r) for r in db.reservas_de(socio['id'])]
+diff --git a/tests/test_cancelar.py b/tests/test_cancelar.py
+new file mode 100644
+index 0000000..61d6405
+--- /dev/null
++++ b/tests/test_cancelar.py
+@@ -0,0 +1,94 @@
++from datetime import timedelta
++
++from conftest import AHORA, auth
++from pulso import db, reloj
++
++
++def reservar(cliente, socio, clase):
++    r = cliente.post('/reservas', json={'clase_id': clase['id']}, headers=auth(socio))
++    assert r.status_code == 201
++    return r.json()['id']
++
++
++def creditos(cliente, socio):
++    return cliente.get('/yo', headers=auth(socio)).json()['creditos']
++
++
++def test_cancela_con_anticipo_y_devuelve_credito(cliente, socio):
++    clase = db.crear_clase('Yoga', 'Sofía', AHORA + timedelta(hours=5))
++    rid = reservar(cliente, socio, clase)
++    r = cliente.post(f'/reservas/{rid}/cancelar', headers=auth(socio))
++    assert r.status_code == 200
++    assert r.json() == {'id': rid, 'clase_id': clase['id'], 'estado': 'cancelada',
++                        'creada': '2026-11-10T15:00:00+00:00', 'credito_devuelto': True}
++    assert creditos(cliente, socio) == 8
++
++
++def test_exactamente_dos_horas_devuelve_credito(cliente, socio):
++    clase = db.crear_clase('Yoga', 'Sofía', AHORA + timedelta(hours=2))
++    rid = reservar(cliente, socio, clase)
++    assert cliente.post(f'/reservas/{rid}/cancelar', headers=auth(socio)).json()['credito_devuelto'] is True
++    assert creditos(cliente, socio) == 8
++
++
++def test_con_menos_de_dos_horas_cancela_sin_devolver(cliente, socio):
++    clase = db.crear_clase('Yoga', 'Sofía', AHORA + timedelta(hours=1, minutes=59))
++    rid = reservar(cliente, socio, clase)
++    r = cliente.post(f'/reservas/{rid}/cancelar', headers=auth(socio))
++    assert r.status_code == 200
++    assert r.json()['estado'] == 'cancelada'
++    assert r.json()['credito_devuelto'] is False
++    assert creditos(cliente, socio) == 7
++
++
++def test_no_cancela_dos_veces(cliente, socio):
++    clase = db.crear_clase('Yoga', 'Sofía', AHORA + timedelta(hours=5))
++    rid = reservar(cliente, socio, clase)
++    cliente.post(f'/reservas/{rid}/cancelar', headers=auth(socio))
++    assert cliente.post(f'/reservas/{rid}/cancelar', headers=auth(socio)).status_code == 409
++    assert creditos(cliente, socio) == 8
++
++
++def test_no_cancela_clase_empezada(cliente, socio):
++    clase = db.crear_clase('Yoga', 'Sofía', AHORA + timedelta(hours=1))
++    rid = reservar(cliente, socio, clase)
++    reloj.fijar(AHORA + timedelta(hours=1))
++    assert cliente.post(f'/reservas/{rid}/cancelar', headers=auth(socio)).status_code == 409
++    reloj.fijar(AHORA + timedelta(hours=2))
++    assert cliente.post(f'/reservas/{rid}/cancelar', headers=auth(socio)).status_code == 409
++    assert creditos(cliente, socio) == 7
++
++
++def test_reserva_ajena_o_inexistente_da_404(cliente, socio):
++    otro = db.crear_socio('Juan Gómez', 'juan@example.com')
++    clase = db.crear_clase('Yoga', 'Sofía', AHORA + timedelta(hours=5))
++    rid = reservar(cliente, socio, clase)
++    assert cliente.post(f'/reservas/{rid}/cancelar', headers=auth(otro)).status_code == 404
++    assert cliente.post('/reservas/999/cancelar', headers=auth(socio)).status_code == 404
++    assert cliente.get('/reservas', headers=auth(socio)).json()[0]['estado'] == 'confirmada'
++    assert creditos(cliente, otro) == 8
++
++
++def test_sin_token(cliente):
++    assert cliente.post('/reservas/1/cancelar').status_code == 401
++
++
++def test_queda_en_listado_y_libera_el_lugar(cliente, socio):
++    otro = db.crear_socio('Juan Gómez', 'juan@example.com')
++    clase = db.crear_clase('Yoga', 'Sofía', AHORA + timedelta(hours=5), cupo=1)
++    rid = reservar(cliente, socio, clase)
++    assert cliente.get(f"/clases/{clase['id']}").json()['lugares_libres'] == 0
++    cliente.post(f'/reservas/{rid}/cancelar', headers=auth(socio))
++    assert cliente.get(f"/clases/{clase['id']}").json()['lugares_libres'] == 1
++    [en_lista] = cliente.get('/reservas', headers=auth(socio)).json()
++    assert en_lista['id'] == rid and en_lista['estado'] == 'cancelada'
++    reservar(cliente, otro, clase)
++
++
++def test_mismo_socio_puede_volver_a_reservar(cliente, socio):
++    clase = db.crear_clase('Yoga', 'Sofía', AHORA + timedelta(hours=5))
++    rid = reservar(cliente, socio, clase)
++    cliente.post(f'/reservas/{rid}/cancelar', headers=auth(socio))
++    nueva = reservar(cliente, socio, clase)
++    assert nueva != rid
++    assert len(cliente.get('/reservas', headers=auth(socio)).json()) == 2

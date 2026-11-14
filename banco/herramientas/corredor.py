@@ -57,8 +57,13 @@ def armar_plan(experimento):
     return [dict(c, orden=i + 1) for i, c in enumerate(plan)]
 
 
-def preparar_repo(destino):
+def preparar_repo(destino, tarea):
+    """Copia la app base y, si la tarea trae un estado inicial propio (tareas/Txx/inicial/), lo pone encima.
+    Así el estado inicial entra en el primer commit y el diff de la corrida muestra solo lo que hizo el agente."""
     shutil.copytree(BANCO / 'app', destino, ignore=shutil.ignore_patterns('__pycache__', '*.db'))
+    inicial = TAREAS / tarea / 'inicial'
+    if inicial.exists():
+        shutil.copytree(inicial, destino, dirs_exist_ok=True, ignore=shutil.ignore_patterns('__pycache__'))
     subprocess.run([*GIT, 'init', '-q'], cwd=destino, check=True)
     subprocess.run([*GIT, 'add', '-A'], cwd=destino, check=True)
     subprocess.run([*GIT, 'commit', '-qm', 'Estado inicial'], cwd=destino, check=True)
@@ -118,7 +123,7 @@ def correr(c_plan, experimento, versiones, claude, version_claude, receptor, car
     destino.mkdir(parents=True)
     trabajo = Path(tempfile.mkdtemp(prefix=f"banco-{c_plan['id']}-"))
     repo = trabajo / 'repo'
-    preparar_repo(repo)
+    preparar_repo(repo, c_plan['tarea'])
     pedido = (TAREAS / c_plan['tarea'] / 'pedido.md').read_text()
     prompt = (BANCO / version['plantilla']).read_text().replace('{pedido}', pedido)
     c = comando(claude, version, prompt)
@@ -151,7 +156,7 @@ def correr(c_plan, experimento, versiones, claude, version_claude, receptor, car
                 eventos_otel=len(eventos), tramos_otel=len(tramos), traza_id=traza,
                 tramos_de_otra_traza=sum(t['_traza'] != traza for t in tramos),
                 fuente_clave=inicio_sesion.get('apiKeySource'),
-                toco_banco=str(TAREAS) in stream or '/tareas/T0' in stream)
+                toco_banco=str(TAREAS) in stream or '/tareas/T' in stream)
     (destino / 'corrida.json').write_text(json.dumps(meta, ensure_ascii=False, indent=2))
     if not conservar:
         shutil.rmtree(trabajo)

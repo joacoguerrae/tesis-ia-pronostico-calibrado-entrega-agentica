@@ -1,0 +1,23 @@
+{
+  "experimento": {
+    "nombre": "humo-joaco",
+    "descripcion": "Corrida de humo en la máquina de Joaco (WSL).",
+    "tareas": [
+      "T01-cancelar-reserva"
+    ],
+    "versiones": [
+      "A"
+    ],
+    "repeticiones": 1,
+    "semilla": 1
+  },
+  "plan": [
+    {
+      "id": "T01-A-01",
+      "tarea": "T01-cancelar-reserva",
+      "version": "A",
+      "repeticion": 1,
+      "orden": 1
+    }
+  ]
+}

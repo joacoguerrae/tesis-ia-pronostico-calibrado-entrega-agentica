@@ -1,0 +1,13 @@
+{
+  "nombre": "B",
+  "descripcion": "Claude Code en modo bare con Haiku 5.5, la plantilla básica y sin cambios al prompt de sistema.",
+  "modelo": "claude-haiku-5-5",
+  "esfuerzo": null,
+  "plantilla": "plantillas/basica.md",
+  "prompt_sistema_extra": null,
+  "herramientas": null,
+  "permitidas": ["Read", "Edit", "Write", "Glob", "Grep", "Bash(python *)", "Bash(git *)", "Bash(ls *)"],
+  "presupuesto_usd": 3,
+  "max_turnos": 100,
+  "limite_min": 20
+}

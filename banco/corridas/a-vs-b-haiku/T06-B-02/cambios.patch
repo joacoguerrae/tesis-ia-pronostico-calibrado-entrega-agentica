@@ -1,0 +1,584 @@
+diff --git a/README.md b/README.md
+index 5e8695a..ed51310 100644
+--- a/README.md
++++ b/README.md
+@@ -36,3 +36,8 @@ python -m pytest
+ | POST | `/reservas` | Reserva una clase: descuenta un crédito y manda el correo de confirmación. |
+ | GET | `/reservas` | Reservas del socio, ordenadas por el inicio de la clase. |
+ | GET | `/yo` | Datos del socio y créditos que le quedan. |
++| POST | `/clases/{id}/espera` | Se anota en la lista de espera de una clase llena. No descuenta créditos. |
++| GET | `/clases/{id}/espera` | Posición del socio en la lista de espera de la clase. |
++| DELETE | `/clases/{id}/espera` | Se baja de la lista de espera. |
++| POST | `/admin/reservas/{id}/cancelar` | Cancela una reserva (admin), devuelve el crédito y pasa el lugar liberado al primero de la lista de espera. |
++| PATCH | `/admin/clases/{id}` | Cambia el cupo de la clase (admin). Los lugares nuevos pasan a la lista de espera. |
+diff --git a/pulso/db.py b/pulso/db.py
+index 59841ac..cbc5146 100644
+--- a/pulso/db.py
++++ b/pulso/db.py
+@@ -29,6 +29,13 @@ CREATE TABLE IF NOT EXISTS reservas (
+     estado TEXT NOT NULL,
+     creada TEXT NOT NULL
+ );
++CREATE TABLE IF NOT EXISTS espera (
++    id INTEGER PRIMARY KEY AUTOINCREMENT,
++    socio_id INTEGER NOT NULL REFERENCES socios(id),
++    clase_id INTEGER NOT NULL REFERENCES clases(id),
++    creada TEXT NOT NULL,
++    UNIQUE (socio_id, clase_id)
++);
+ CREATE TABLE IF NOT EXISTS correos (
+     id INTEGER PRIMARY KEY,
+     para TEXT NOT NULL,
+@@ -60,6 +67,32 @@ def inicializar():
+         con.executescript(ESQUEMA)
+ 
+ 
++@contextmanager
++def transaccion():
++    """Operación atómica: toma el lock de escritura al empezar, así que todo se confirma junto o nada."""
++    con = sqlite3.connect(ruta(), isolation_level=None)
++    con.row_factory = sqlite3.Row
++    con.execute('PRAGMA foreign_keys = ON')
++    try:
++        con.execute('BEGIN IMMEDIATE')
++        yield con
++        con.execute('COMMIT')
++    except BaseException:
++        con.execute('ROLLBACK')
++        raise
++    finally:
++        con.close()
++
++
++def _una_en(con, sql, parametros=()):
++    fila = con.execute(sql, parametros).fetchone()
++    return dict(fila) if fila else None
++
++
++def _varias_en(con, sql, parametros=()):
++    return [dict(f) for f in con.execute(sql, parametros).fetchall()]
++
++
+ def a_texto(momento):
+     return momento.astimezone(timezone.utc).replace(microsecond=0).isoformat()
+ 
+@@ -136,3 +169,62 @@ def sumar_creditos(socio_id, cantidad):
+ 
+ def correos():
+     return _varias('SELECT * FROM correos ORDER BY id')
++
++
++# Versiones que reciben la conexión de transaccion(), para operaciones que tienen que ser atómicas.
++
++def socio_en(con, socio_id):
++    return _una_en(con, 'SELECT * FROM socios WHERE id = ?', (socio_id,))
++
++
++def clase_en(con, clase_id):
++    return _una_en(con, 'SELECT * FROM clases WHERE id = ?', (clase_id,))
++
++
++def confirmadas_en(con, clase_id):
++    return _una_en(con, "SELECT COUNT(*) AS n FROM reservas WHERE clase_id = ? AND estado = 'confirmada'",
++                   (clase_id,))['n']
++
++
++def tiene_confirmada_en(con, socio_id, clase_id):
++    return _una_en(con, "SELECT 1 AS x FROM reservas WHERE socio_id = ? AND clase_id = ? AND estado = 'confirmada'",
++                   (socio_id, clase_id)) is not None
++
++
++def reserva_en(con, reserva_id):
++    return _una_en(con, 'SELECT * FROM reservas WHERE id = ?', (reserva_id,))
++
++
++def insertar_reserva_en(con, socio_id, clase_id, creada):
++    cur = con.execute("INSERT INTO reservas (socio_id, clase_id, estado, creada) VALUES (?, ?, 'confirmada', ?)",
++                      (socio_id, clase_id, a_texto(creada)))
++    return _una_en(con, 'SELECT * FROM reservas WHERE id = ?', (cur.lastrowid,))
++
++
++def cambiar_estado_reserva_en(con, reserva_id, estado):
++    con.execute('UPDATE reservas SET estado = ? WHERE id = ?', (estado, reserva_id))
++
++
++def ajustar_creditos_en(con, socio_id, cantidad):
++    con.execute('UPDATE socios SET creditos = creditos + ? WHERE id = ?', (cantidad, socio_id))
++
++
++def cambiar_cupo_en(con, clase_id, cupo):
++    con.execute('UPDATE clases SET cupo = ? WHERE id = ?', (cupo, clase_id))
++
++
++def espera_de_en(con, clase_id):
++    return _varias_en(con, 'SELECT * FROM espera WHERE clase_id = ? ORDER BY id', (clase_id,))
++
++
++def en_espera_en(con, socio_id, clase_id):
++    return _una_en(con, 'SELECT * FROM espera WHERE socio_id = ? AND clase_id = ?', (socio_id, clase_id))
++
++
++def anotar_en_espera_en(con, socio_id, clase_id, creada):
++    con.execute('INSERT INTO espera (socio_id, clase_id, creada) VALUES (?, ?, ?)',
++                (socio_id, clase_id, a_texto(creada)))
++
++
++def quitar_de_espera_en(con, socio_id, clase_id):
++    con.execute('DELETE FROM espera WHERE socio_id = ? AND clase_id = ?', (socio_id, clase_id))
+diff --git a/pulso/espera.py b/pulso/espera.py
+new file mode 100644
+index 0000000..df6ad71
+--- /dev/null
++++ b/pulso/espera.py
+@@ -0,0 +1,48 @@
++"""Lista de espera: los lugares libres de una clase pasan solos al primero de la lista.
++
++Todas las funciones que escriben reciben la conexión de db.transaccion(). Los correos se
++devuelven en vez de enviarse, para mandarlos recién cuando la operación quedó confirmada.
++"""
++from pulso import correo, db, reloj
++
++
++def posicion(con, clase_id, socio_id):
++    for i, fila in enumerate(db.espera_de_en(con, clase_id), start=1):
++        if fila['socio_id'] == socio_id:
++            return i
++    return None
++
++
++def asignar_lugares(con, clase_id):
++    """Llena los lugares libres de la clase con la lista de espera. Devuelve los correos a enviar."""
++    ahora = reloj.ahora()
++    clase = db.clase_en(con, clase_id)
++    inicio = db.a_fecha(clase['inicio'])
++    if inicio <= ahora:
++        return []
++    asunto = f"{clase['nombre']} el {correo.fecha_y_hora(inicio)}"
++    pendientes = []
++    while db.confirmadas_en(con, clase_id) < clase['cupo']:
++        espera = db.espera_de_en(con, clase_id)
++        if not espera:
++            break
++        socio = db.socio_en(con, espera[0]['socio_id'])
++        db.quitar_de_espera_en(con, socio['id'], clase_id)
++        if db.tiene_confirmada_en(con, socio['id'], clase_id):
++            continue
++        if socio['creditos'] < 1:
++            pendientes.append((socio['email'], f'No pudimos darte el lugar: {asunto}',
++                               f"Hola {socio['nombre']}, se liberó un lugar en {clase['nombre']} "
++                               f"pero no te quedan créditos para reservarlo."))
++            continue
++        db.insertar_reserva_en(con, socio['id'], clase_id, ahora)
++        db.ajustar_creditos_en(con, socio['id'], -1)
++        pendientes.append((socio['email'], f'Se liberó un lugar: {asunto}',
++                           f"Hola {socio['nombre']}, se liberó un lugar en {clase['nombre']} con "
++                           f"{clase['instructor']} y ya lo tenés reservado."))
++    return pendientes
++
++
++def enviar(pendientes):
++    for para, asunto, cuerpo in pendientes:
++        correo.enviar(para, asunto, cuerpo)
+diff --git a/pulso/main.py b/pulso/main.py
+index 039212d..b45a0f4 100644
+--- a/pulso/main.py
++++ b/pulso/main.py
+@@ -1,9 +1,9 @@
+ import os
+ 
+ from fastapi import APIRouter, Depends, FastAPI, Header, HTTPException
+-from pydantic import AwareDatetime, BaseModel, Field
++from pydantic import AwareDatetime, BaseModel, Field, StrictInt
+ 
+-from pulso import correo, db, reloj
++from pulso import correo, db, espera, reloj
+ 
+ router = APIRouter()
+ 
+@@ -92,6 +92,79 @@ def yo(socio=Depends(socio_actual)):
+     return {k: socio[k] for k in ('id', 'nombre', 'email', 'plan', 'creditos')}
+ 
+ 
++@router.post('/clases/{clase_id}/espera', status_code=201)
++def anotarse_en_espera(clase_id: int, socio=Depends(socio_actual)):
++    with db.transaccion() as con:
++        clase = db.clase_en(con, clase_id)
++        if clase is None:
++            raise HTTPException(404, 'No existe la clase')
++        if db.a_fecha(clase['inicio']) <= reloj.ahora():
++            raise HTTPException(409, 'La clase ya empezó')
++        if db.confirmadas_en(con, clase_id) < clase['cupo']:
++            raise HTTPException(409, 'La clase tiene lugar, reservá directo')
++        if db.tiene_confirmada_en(con, socio['id'], clase_id):
++            raise HTTPException(409, 'Ya tenés una reserva para esta clase')
++        if db.en_espera_en(con, socio['id'], clase_id):
++            raise HTTPException(409, 'Ya estás en la lista de espera')
++        if db.socio_en(con, socio['id'])['creditos'] < 1:
++            raise HTTPException(409, 'No te quedan créditos')
++        db.anotar_en_espera_en(con, socio['id'], clase_id, reloj.ahora())
++        return {'clase_id': clase_id, 'posicion': espera.posicion(con, clase_id, socio['id'])}
++
++
++@router.get('/clases/{clase_id}/espera')
++def ver_posicion_en_espera(clase_id: int, socio=Depends(socio_actual)):
++    with db.transaccion() as con:
++        if db.clase_en(con, clase_id) is None:
++            raise HTTPException(404, 'No existe la clase')
++        posicion = espera.posicion(con, clase_id, socio['id'])
++        if posicion is None:
++            raise HTTPException(404, 'No estás en la lista de espera')
++        return {'clase_id': clase_id, 'posicion': posicion}
++
++
++@router.delete('/clases/{clase_id}/espera', status_code=204)
++def bajarse_de_espera(clase_id: int, socio=Depends(socio_actual)):
++    with db.transaccion() as con:
++        if db.clase_en(con, clase_id) is None:
++            raise HTTPException(404, 'No existe la clase')
++        if db.en_espera_en(con, socio['id'], clase_id) is None:
++            raise HTTPException(404, 'No estás en la lista de espera')
++        db.quitar_de_espera_en(con, socio['id'], clase_id)
++
++
++class CambioCupo(BaseModel):
++    cupo: StrictInt = Field(gt=0)
++
++
++@router.post('/admin/reservas/{reserva_id}/cancelar', dependencies=[Depends(admin)])
++def cancelar_reserva(reserva_id: int):
++    with db.transaccion() as con:
++        reserva = db.reserva_en(con, reserva_id)
++        if reserva is None:
++            raise HTTPException(404, 'No existe la reserva')
++        if reserva['estado'] == 'cancelada':
++            raise HTTPException(409, 'La reserva ya está cancelada')
++        db.cambiar_estado_reserva_en(con, reserva_id, 'cancelada')
++        db.ajustar_creditos_en(con, reserva['socio_id'], 1)
++        pendientes = espera.asignar_lugares(con, reserva['clase_id'])
++    espera.enviar(pendientes)
++    return ver_reserva(db.reserva(reserva_id))
++
++
++@router.patch('/admin/clases/{clase_id}', dependencies=[Depends(admin)])
++def cambiar_cupo(clase_id: int, datos: CambioCupo):
++    with db.transaccion() as con:
++        if db.clase_en(con, clase_id) is None:
++            raise HTTPException(404, 'No existe la clase')
++        if datos.cupo < db.confirmadas_en(con, clase_id):
++            raise HTTPException(409, 'El cupo no puede ser menor que las reservas confirmadas')
++        db.cambiar_cupo_en(con, clase_id, datos.cupo)
++        pendientes = espera.asignar_lugares(con, clase_id)
++    espera.enviar(pendientes)
++    return ver_clase(db.clase(clase_id))
++
++
+ def crear_app():
+     db.inicializar()
+     app = FastAPI(title='Pulso')
+diff --git a/tests/test_espera.py b/tests/test_espera.py
+new file mode 100644
+index 0000000..ab51849
+--- /dev/null
++++ b/tests/test_espera.py
+@@ -0,0 +1,301 @@
++from datetime import timedelta
++
++import pytest
++
++from conftest import ADMIN, AHORA, auth
++from pulso import db
++
++# 10/11 a las 18:30 en Montevideo.
++INICIO = AHORA + timedelta(hours=6, minutes=30)
++ASUNTO = 'Yoga el 10/11 a las 18:30'
++
++
++def llenar(clase):
++    """Reservas confirmadas de otros socios hasta llenar la clase."""
++    reservas = []
++    for i in range(clase['cupo']):
++        otro = db.crear_socio(f'Otro {i}', f'otro{i}@example.com')
++        reservas.append(db.crear_reserva(otro['id'], clase['id'], AHORA))
++    return reservas
++
++
++def anotar(cliente, socio, clase):
++    return cliente.post(f"/clases/{clase['id']}/espera", headers=auth(socio))
++
++
++def correos_para(email):
++    return [c['asunto'] for c in db.correos() if c['para'] == email]
++
++
++# Socio: lista de espera
++
++def test_anotarse_en_clase_llena_da_posicion(cliente, socio):
++    clase = db.crear_clase('Yoga', 'Sofía', INICIO, cupo=1)
++    llenar(clase)
++    r = anotar(cliente, socio, clase)
++    assert r.status_code == 201
++    assert r.json() == {'clase_id': clase['id'], 'posicion': 1}
++
++
++def test_anotarse_no_descuenta_creditos_ni_reserva(cliente, socio):
++    clase = db.crear_clase('Yoga', 'Sofía', INICIO, cupo=1)
++    llenar(clase)
++    assert anotar(cliente, socio, clase).status_code == 201
++    assert cliente.get('/yo', headers=auth(socio)).json()['creditos'] == 8
++    assert cliente.get('/reservas', headers=auth(socio)).json() == []
++
++
++def test_espera_requiere_token(cliente):
++    clase = db.crear_clase('Yoga', 'Sofía', INICIO, cupo=1)
++    assert cliente.post(f"/clases/{clase['id']}/espera").status_code == 401
++    assert cliente.get(f"/clases/{clase['id']}/espera").status_code == 401
++    assert cliente.delete(f"/clases/{clase['id']}/espera").status_code == 401
++
++
++def test_espera_clase_inexistente_404(cliente, socio):
++    assert cliente.post('/clases/99/espera', headers=auth(socio)).status_code == 404
++    assert cliente.get('/clases/99/espera', headers=auth(socio)).status_code == 404
++    assert cliente.delete('/clases/99/espera', headers=auth(socio)).status_code == 404
++
++
++def test_no_se_anota_si_la_clase_tiene_lugar(cliente, socio):
++    clase = db.crear_clase('Yoga', 'Sofía', INICIO, cupo=2)
++    db.crear_reserva(db.crear_socio('Otro', 'otro@example.com')['id'], clase['id'], AHORA)
++    assert anotar(cliente, socio, clase).status_code == 409
++    assert cliente.get(f"/clases/{clase['id']}/espera", headers=auth(socio)).status_code == 404
++
++
++def test_no_se_anota_con_reserva_confirmada(cliente, socio):
++    clase = db.crear_clase('Yoga', 'Sofía', INICIO, cupo=1)
++    db.crear_reserva(socio['id'], clase['id'], AHORA)
++    assert anotar(cliente, socio, clase).status_code == 409
++
++
++def test_no_se_anota_dos_veces(cliente, socio):
++    clase = db.crear_clase('Yoga', 'Sofía', INICIO, cupo=1)
++    llenar(clase)
++    assert anotar(cliente, socio, clase).status_code == 201
++    assert anotar(cliente, socio, clase).status_code == 409
++
++
++@pytest.mark.parametrize('inicio', [AHORA, AHORA - timedelta(minutes=5)])
++def test_no_se_anota_en_clase_empezada(cliente, socio, inicio):
++    clase = db.crear_clase('Yoga', 'Sofía', inicio, cupo=1)
++    llenar(clase)
++    assert anotar(cliente, socio, clase).status_code == 409
++
++
++def test_no_se_anota_sin_creditos(cliente):
++    socio = db.crear_socio('Ana Pérez', 'ana@example.com', creditos=0)
++    clase = db.crear_clase('Yoga', 'Sofía', INICIO, cupo=1)
++    llenar(clase)
++    assert anotar(cliente, socio, clase).status_code == 409
++
++
++def test_posicion_sigue_el_orden_de_llegada(cliente, socio):
++    clase = db.crear_clase('Yoga', 'Sofía', INICIO, cupo=1)
++    llenar(clase)
++    bruno = db.crear_socio('Bruno', 'bruno@example.com')
++    carla = db.crear_socio('Carla', 'carla@example.com')
++    for s in (socio, bruno, carla):
++        assert anotar(cliente, s, clase).status_code == 201
++    for esperado, s in enumerate((socio, bruno, carla), start=1):
++        r = cliente.get(f"/clases/{clase['id']}/espera", headers=auth(s))
++        assert r.status_code == 200
++        assert r.json() == {'clase_id': clase['id'], 'posicion': esperado}
++
++
++def test_al_bajarse_los_de_atras_avanzan(cliente, socio):
++    clase = db.crear_clase('Yoga', 'Sofía', INICIO, cupo=1)
++    llenar(clase)
++    bruno = db.crear_socio('Bruno', 'bruno@example.com')
++    anotar(cliente, socio, clase)
++    anotar(cliente, bruno, clase)
++    assert cliente.delete(f"/clases/{clase['id']}/espera", headers=auth(socio)).status_code == 204
++    r = cliente.get(f"/clases/{clase['id']}/espera", headers=auth(bruno))
++    assert r.json()['posicion'] == 1
++    assert cliente.get(f"/clases/{clase['id']}/espera", headers=auth(socio)).status_code == 404
++    assert cliente.delete(f"/clases/{clase['id']}/espera", headers=auth(socio)).status_code == 404
++
++
++def test_al_volver_a_anotarse_queda_ultimo(cliente, socio):
++    clase = db.crear_clase('Yoga', 'Sofía', INICIO, cupo=1)
++    llenar(clase)
++    bruno = db.crear_socio('Bruno', 'bruno@example.com')
++    anotar(cliente, socio, clase)
++    anotar(cliente, bruno, clase)
++    cliente.delete(f"/clases/{clase['id']}/espera", headers=auth(socio))
++    r = anotar(cliente, socio, clase)
++    assert r.json()['posicion'] == 2
++
++
++# Recepción: cancelar reservas
++
++def test_cancelar_pasa_el_lugar_al_primero_de_la_lista(cliente, socio):
++    clase = db.crear_clase('Yoga', 'Sofía', INICIO, cupo=1)
++    [reserva] = llenar(clase)
++    bruno = db.crear_socio('Bruno', 'bruno@example.com')
++    anotar(cliente, socio, clase)
++    anotar(cliente, bruno, clase)
++
++    r = cliente.post(f"/admin/reservas/{reserva['id']}/cancelar", headers=ADMIN)
++    assert r.status_code == 200
++    assert r.json() == {'id': reserva['id'], 'clase_id': clase['id'], 'estado': 'cancelada',
++                        'creada': reserva['creada']}
++
++    mis = cliente.get('/reservas', headers=auth(socio)).json()
++    assert [(x['clase_id'], x['estado']) for x in mis] == [(clase['id'], 'confirmada')]
++    assert cliente.get('/yo', headers=auth(socio)).json()['creditos'] == 7
++    assert cliente.get(f"/clases/{clase['id']}/espera", headers=auth(socio)).status_code == 404
++    assert cliente.get(f"/clases/{clase['id']}/espera", headers=auth(bruno)).json()['posicion'] == 1
++    assert cliente.get(f"/clases/{clase['id']}").json()['lugares_libres'] == 0
++    assert correos_para('ana@example.com') == [f'Se liberó un lugar: {ASUNTO}']
++    assert correos_para('bruno@example.com') == []
++
++
++def test_cancelada_sigue_visible_en_reservas(cliente):
++    otro = db.crear_socio('Otro', 'otro@example.com')
++    clase = db.crear_clase('Yoga', 'Sofía', INICIO, cupo=1)
++    reserva = db.crear_reserva(otro['id'], clase['id'], AHORA)
++    cliente.post(f"/admin/reservas/{reserva['id']}/cancelar", headers=ADMIN)
++    mis = cliente.get('/reservas', headers=auth(otro)).json()
++    assert [x['estado'] for x in mis] == ['cancelada']
++    assert cliente.get('/yo', headers=auth(otro)).json()['creditos'] == 9
++
++
++def test_cancelar_reserva_inexistente_404(cliente):
++    assert cliente.post('/admin/reservas/99/cancelar', headers=ADMIN).status_code == 404
++
++
++def test_cancelar_dos_veces_409_sin_devolver_otro_credito(cliente):
++    otro = db.crear_socio('Otro', 'otro@example.com')
++    clase = db.crear_clase('Yoga', 'Sofía', INICIO, cupo=1)
++    reserva = db.crear_reserva(otro['id'], clase['id'], AHORA)
++    assert cliente.post(f"/admin/reservas/{reserva['id']}/cancelar", headers=ADMIN).status_code == 200
++    assert cliente.post(f"/admin/reservas/{reserva['id']}/cancelar", headers=ADMIN).status_code == 409
++    assert cliente.get('/yo', headers=auth(otro)).json()['creditos'] == 9
++
++
++def test_cancelar_requiere_clave_de_admin(cliente):
++    otro = db.crear_socio('Otro', 'otro@example.com')
++    clase = db.crear_clase('Yoga', 'Sofía', INICIO, cupo=1)
++    reserva = db.crear_reserva(otro['id'], clase['id'], AHORA)
++    assert cliente.post(f"/admin/reservas/{reserva['id']}/cancelar").status_code == 401
++    assert db.reserva(reserva['id'])['estado'] == 'confirmada'
++
++
++def test_cancelar_saltea_al_que_no_tiene_creditos(cliente, socio):
++    clase = db.crear_clase('Yoga', 'Sofía', INICIO, cupo=1)
++    [reserva] = llenar(clase)
++    sin_creditos = db.crear_socio('Sin créditos', 'sin@example.com', creditos=0)
++    anotar(cliente, sin_creditos, clase)
++    anotar(cliente, socio, clase)
++
++    cliente.post(f"/admin/reservas/{reserva['id']}/cancelar", headers=ADMIN)
++
++    assert correos_para('sin@example.com') == [f'No pudimos darte el lugar: {ASUNTO}']
++    assert cliente.get('/yo', headers=auth(sin_creditos)).json()['creditos'] == 0
++    assert cliente.get(f"/clases/{clase['id']}/espera", headers=auth(sin_creditos)).status_code == 404
++    assert correos_para('ana@example.com') == [f'Se liberó un lugar: {ASUNTO}']
++    assert cliente.get('/yo', headers=auth(socio)).json()['creditos'] == 7
++
++
++def test_cancelar_clase_empezada_devuelve_credito_y_no_asigna(cliente, socio):
++    clase = db.crear_clase('Yoga', 'Sofía', AHORA - timedelta(minutes=5), cupo=1)
++    otro = db.crear_socio('Otro', 'otro@example.com')
++    reserva = db.crear_reserva(otro['id'], clase['id'], AHORA)
++    with db.transaccion() as con:
++        db.anotar_en_espera_en(con, socio['id'], clase['id'], AHORA)
++
++    assert cliente.post(f"/admin/reservas/{reserva['id']}/cancelar", headers=ADMIN).status_code == 200
++
++    assert cliente.get('/yo', headers=auth(otro)).json()['creditos'] == 9
++    assert cliente.get(f"/clases/{clase['id']}/espera", headers=auth(socio)).json()['posicion'] == 1
++    assert cliente.get('/yo', headers=auth(socio)).json()['creditos'] == 8
++    assert correos_para('ana@example.com') == []
++    assert cliente.get(f"/clases/{clase['id']}").json()['lugares_libres'] == 1
++
++
++# Recepción: cambiar el cupo
++
++def test_ampliar_cupo_asigna_k_lugares_en_orden(cliente, socio):
++    clase = db.crear_clase('Yoga', 'Sofía', INICIO, cupo=1)
++    llenar(clase)
++    bruno = db.crear_socio('Bruno', 'bruno@example.com')
++    carla = db.crear_socio('Carla', 'carla@example.com')
++    diego = db.crear_socio('Diego', 'diego@example.com')
++    for s in (socio, bruno, carla, diego):
++        anotar(cliente, s, clase)
++
++    r = cliente.patch(f"/admin/clases/{clase['id']}", json={'cupo': 3}, headers=ADMIN)
++    assert r.status_code == 200
++    assert r.json()['cupo'] == 3
++    assert r.json()['lugares_libres'] == 0
++    assert cliente.get(f"/clases/{clase['id']}/espera", headers=auth(diego)).json()['posicion'] == 1
++    assert cliente.get(f"/clases/{clase['id']}/espera", headers=auth(socio)).status_code == 404
++    assert cliente.get(f"/clases/{clase['id']}/espera", headers=auth(bruno)).status_code == 404
++    assert [x['estado'] for x in cliente.get('/reservas', headers=auth(socio)).json()] == ['confirmada']
++    assert [x['estado'] for x in cliente.get('/reservas', headers=auth(bruno)).json()] == ['confirmada']
++    assert cliente.get('/reservas', headers=auth(diego)).json() == []
++    assert correos_para('bruno@example.com') == [f'Se liberó un lugar: {ASUNTO}']
++    assert correos_para('diego@example.com') == []
++
++
++def test_saltea_al_que_ya_tiene_reserva_confirmada(cliente, socio):
++    clase = db.crear_clase('Yoga', 'Sofía', INICIO, cupo=1)
++    llenar(clase)
++    bruno = db.crear_socio('Bruno', 'bruno@example.com')
++    anotar(cliente, socio, clase)
++    anotar(cliente, bruno, clase)
++    db.crear_reserva(socio['id'], clase['id'], AHORA)
++
++    r = cliente.patch(f"/admin/clases/{clase['id']}", json={'cupo': 3}, headers=ADMIN)
++    assert r.json()['lugares_libres'] == 0
++    assert cliente.get(f"/clases/{clase['id']}/espera", headers=auth(socio)).status_code == 404
++    assert cliente.get('/yo', headers=auth(socio)).json()['creditos'] == 8
++    assert correos_para('ana@example.com') == []
++    assert [x['estado'] for x in cliente.get('/reservas', headers=auth(bruno)).json()] == ['confirmada']
++
++
++def test_cupo_menor_que_confirmadas_409_y_no_cambia(cliente):
++    clase = db.crear_clase('Yoga', 'Sofía', INICIO, cupo=3)
++    for i in range(2):
++        db.crear_reserva(db.crear_socio(f'Extra {i}', f'extra{i}@example.com')['id'], clase['id'], AHORA)
++    r = cliente.patch(f"/admin/clases/{clase['id']}", json={'cupo': 1}, headers=ADMIN)
++    assert r.status_code == 409
++    assert cliente.get(f"/clases/{clase['id']}").json()['cupo'] == 3
++
++
++def test_cupo_igual_a_confirmadas_se_permite(cliente):
++    clase = db.crear_clase('Yoga', 'Sofía', INICIO, cupo=3)
++    db.crear_reserva(db.crear_socio('Uno', 'uno@example.com')['id'], clase['id'], AHORA)
++    db.crear_reserva(db.crear_socio('Dos', 'dos@example.com')['id'], clase['id'], AHORA)
++    r = cliente.patch(f"/admin/clases/{clase['id']}", json={'cupo': 2}, headers=ADMIN)
++    assert r.status_code == 200
++    assert r.json()['lugares_libres'] == 0
++
++
++@pytest.mark.parametrize('cuerpo', [{}, {'cupo': 0}, {'cupo': -1}, {'cupo': 'diez'}, {'cupo': 2.5}, {'cupo': True}])
++def test_cupo_invalido_422(cliente, cuerpo):
++    clase = db.crear_clase('Yoga', 'Sofía', INICIO, cupo=3)
++    assert cliente.patch(f"/admin/clases/{clase['id']}", json=cuerpo, headers=ADMIN).status_code == 422
++
++
++def test_cambiar_cupo_requiere_clave_y_clase_existente(cliente):
++    clase = db.crear_clase('Yoga', 'Sofía', INICIO, cupo=3)
++    assert cliente.patch(f"/admin/clases/{clase['id']}", json={'cupo': 5}).status_code == 401
++    assert cliente.patch('/admin/clases/99', json={'cupo': 5}, headers=ADMIN).status_code == 404
++    assert cliente.get(f"/clases/{clase['id']}").json()['cupo'] == 3
++
++
++def test_cambiar_cupo_de_clase_empezada_no_asigna(cliente, socio):
++    clase = db.crear_clase('Yoga', 'Sofía', AHORA - timedelta(minutes=5), cupo=1)
++    db.crear_reserva(db.crear_socio('Otro', 'otro@example.com')['id'], clase['id'], AHORA)
++    with db.transaccion() as con:
++        db.anotar_en_espera_en(con, socio['id'], clase['id'], AHORA)
++
++    r = cliente.patch(f"/admin/clases/{clase['id']}", json={'cupo': 2}, headers=ADMIN)
++    assert r.status_code == 200
++    assert r.json()['lugares_libres'] == 1
++    assert cliente.get(f"/clases/{clase['id']}/espera", headers=auth(socio)).json()['posicion'] == 1
++    assert correos_para('ana@example.com') == []

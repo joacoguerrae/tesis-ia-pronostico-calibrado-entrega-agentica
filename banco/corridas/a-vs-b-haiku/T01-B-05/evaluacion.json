@@ -1,0 +1,20 @@
+{
+  "tarea": "T01-cancelar-reserva",
+  "tests": 11,
+  "pasados": 11,
+  "exito": true,
+  "pasaron": [
+    "test_con_anticipacion_devuelve_el_credito",
+    "test_respuesta_trae_los_campos_de_la_reserva",
+    "test_con_dos_horas_justas_devuelve_el_credito",
+    "test_con_menos_de_dos_horas_no_devuelve_el_credito",
+    "test_no_cancela_una_clase_que_ya_empezo",
+    "test_no_cancela_dos_veces",
+    "test_reserva_de_otro_o_inexistente",
+    "test_sin_token",
+    "test_libera_el_lugar_para_otro_socio",
+    "test_puede_volver_a_reservar_la_misma_clase",
+    "test_sigue_apareciendo_en_mis_reservas"
+  ],
+  "fallidos": []
+}

@@ -1,0 +1,584 @@
+{
+  "experimento": {
+    "nombre": "a-vs-b-haiku",
+    "descripcion": "Primera comparación: A (Sonnet 5.5) contra B (Haiku 5.5), 8 tareas, 5 repeticiones, versiones intercaladas.",
+    "tareas": [
+      "T01-cancelar-reserva",
+      "T02-filtrar-clases",
+      "T03-exportar-ocupacion",
+      "T04-alta-de-socios",
+      "T05-recordatorios",
+      "T06-lista-de-espera",
+      "T07-compra-de-creditos",
+      "T08-convenios"
+    ],
+    "versiones": [
+      "A",
+      "B"
+    ],
+    "repeticiones": 5,
+    "semilla": 1114
+  },
+  "plan": [
+    {
+      "id": "T07-A-01",
+      "tarea": "T07-compra-de-creditos",
+      "version": "A",
+      "repeticion": 1,
+      "orden": 1
+    },
+    {
+      "id": "T02-A-01",
+      "tarea": "T02-filtrar-clases",
+      "version": "A",
+      "repeticion": 1,
+      "orden": 2
+    },
+    {
+      "id": "T03-B-01",
+      "tarea": "T03-exportar-ocupacion",
+      "version": "B",
+      "repeticion": 1,
+      "orden": 3
+    },
+    {
+      "id": "T03-A-01",
+      "tarea": "T03-exportar-ocupacion",
+      "version": "A",
+      "repeticion": 1,
+      "orden": 4
+    },
+    {
+      "id": "T02-B-01",
+      "tarea": "T02-filtrar-clases",
+      "version": "B",
+      "repeticion": 1,
+      "orden": 5
+    },
+    {
+      "id": "T01-B-01",
+      "tarea": "T01-cancelar-reserva",
+      "version": "B",
+      "repeticion": 1,
+      "orden": 6
+    },
+    {
+      "id": "T01-A-01",
+      "tarea": "T01-cancelar-reserva",
+      "version": "A",
+      "repeticion": 1,
+      "orden": 7
+    },
+    {
+      "id": "T04-A-01",
+      "tarea": "T04-alta-de-socios",
+      "version": "A",
+      "repeticion": 1,
+      "orden": 8
+    },
+    {
+      "id": "T08-B-01",
+      "tarea": "T08-convenios",
+      "version": "B",
+      "repeticion": 1,
+      "orden": 9
+    },
+    {
+      "id": "T06-A-01",
+      "tarea": "T06-lista-de-espera",
+      "version": "A",
+      "repeticion": 1,
+      "orden": 10
+    },
+    {
+      "id": "T05-B-01",
+      "tarea": "T05-recordatorios",
+      "version": "B",
+      "repeticion": 1,
+      "orden": 11
+    },
+    {
+      "id": "T08-A-01",
+      "tarea": "T08-convenios",
+      "version": "A",
+      "repeticion": 1,
+      "orden": 12
+    },
+    {
+      "id": "T06-B-01",
+      "tarea": "T06-lista-de-espera",
+      "version": "B",
+      "repeticion": 1,
+      "orden": 13
+    },
+    {
+      "id": "T07-B-01",
+      "tarea": "T07-compra-de-creditos",
+      "version": "B",
+      "repeticion": 1,
+      "orden": 14
+    },
+    {
+      "id": "T04-B-01",
+      "tarea": "T04-alta-de-socios",
+      "version": "B",
+      "repeticion": 1,
+      "orden": 15
+    },
+    {
+      "id": "T05-A-01",
+      "tarea": "T05-recordatorios",
+      "version": "A",
+      "repeticion": 1,
+      "orden": 16
+    },
+    {
+      "id": "T07-B-02",
+      "tarea": "T07-compra-de-creditos",
+      "version": "B",
+      "repeticion": 2,
+      "orden": 17
+    },
+    {
+      "id": "T06-A-02",
+      "tarea": "T06-lista-de-espera",
+      "version": "A",
+      "repeticion": 2,
+      "orden": 18
+    },
+    {
+      "id": "T03-B-02",
+      "tarea": "T03-exportar-ocupacion",
+      "version": "B",
+      "repeticion": 2,
+      "orden": 19
+    },
+    {
+      "id": "T01-B-02",
+      "tarea": "T01-cancelar-reserva",
+      "version": "B",
+      "repeticion": 2,
+      "orden": 20
+    },
+    {
+      "id": "T02-B-02",
+      "tarea": "T02-filtrar-clases",
+      "version": "B",
+      "repeticion": 2,
+      "orden": 21
+    },
+    {
+      "id": "T07-A-02",
+      "tarea": "T07-compra-de-creditos",
+      "version": "A",
+      "repeticion": 2,
+      "orden": 22
+    },
+    {
+      "id": "T01-A-02",
+      "tarea": "T01-cancelar-reserva",
+      "version": "A",
+      "repeticion": 2,
+      "orden": 23
+    },
+    {
+      "id": "T08-B-02",
+      "tarea": "T08-convenios",
+      "version": "B",
+      "repeticion": 2,
+      "orden": 24
+    },
+    {
+      "id": "T04-B-02",
+      "tarea": "T04-alta-de-socios",
+      "version": "B",
+      "repeticion": 2,
+      "orden": 25
+    },
+    {
+      "id": "T08-A-02",
+      "tarea": "T08-convenios",
+      "version": "A",
+      "repeticion": 2,
+      "orden": 26
+    },
+    {
+      "id": "T06-B-02",
+      "tarea": "T06-lista-de-espera",
+      "version": "B",
+      "repeticion": 2,
+      "orden": 27
+    },
+    {
+      "id": "T03-A-02",
+      "tarea": "T03-exportar-ocupacion",
+      "version": "A",
+      "repeticion": 2,
+      "orden": 28
+    },
+    {
+      "id": "T02-A-02",
+      "tarea": "T02-filtrar-clases",
+      "version": "A",
+      "repeticion": 2,
+      "orden": 29
+    },
+    {
+      "id": "T05-B-02",
+      "tarea": "T05-recordatorios",
+      "version": "B",
+      "repeticion": 2,
+      "orden": 30
+    },
+    {
+      "id": "T04-A-02",
+      "tarea": "T04-alta-de-socios",
+      "version": "A",
+      "repeticion": 2,
+      "orden": 31
+    },
+    {
+      "id": "T05-A-02",
+      "tarea": "T05-recordatorios",
+      "version": "A",
+      "repeticion": 2,
+      "orden": 32
+    },
+    {
+      "id": "T07-B-03",
+      "tarea": "T07-compra-de-creditos",
+      "version": "B",
+      "repeticion": 3,
+      "orden": 33
+    },
+    {
+      "id": "T06-B-03",
+      "tarea": "T06-lista-de-espera",
+      "version": "B",
+      "repeticion": 3,
+      "orden": 34
+    },
+    {
+      "id": "T01-A-03",
+      "tarea": "T01-cancelar-reserva",
+      "version": "A",
+      "repeticion": 3,
+      "orden": 35
+    },
+    {
+      "id": "T08-B-03",
+      "tarea": "T08-convenios",
+      "version": "B",
+      "repeticion": 3,
+      "orden": 36
+    },
+    {
+      "id": "T02-B-03",
+      "tarea": "T02-filtrar-clases",
+      "version": "B",
+      "repeticion": 3,
+      "orden": 37
+    },
+    {
+      "id": "T07-A-03",
+      "tarea": "T07-compra-de-creditos",
+      "version": "A",
+      "repeticion": 3,
+      "orden": 38
+    },
+    {
+      "id": "T08-A-03",
+      "tarea": "T08-convenios",
+      "version": "A",
+      "repeticion": 3,
+      "orden": 39
+    },
+    {
+      "id": "T05-A-03",
+      "tarea": "T05-recordatorios",
+      "version": "A",
+      "repeticion": 3,
+      "orden": 40
+    },
+    {
+      "id": "T05-B-03",
+      "tarea": "T05-recordatorios",
+      "version": "B",
+      "repeticion": 3,
+      "orden": 41
+    },
+    {
+      "id": "T03-A-03",
+      "tarea": "T03-exportar-ocupacion",
+      "version": "A",
+      "repeticion": 3,
+      "orden": 42
+    },
+    {
+      "id": "T06-A-03",
+      "tarea": "T06-lista-de-espera",
+      "version": "A",
+      "repeticion": 3,
+      "orden": 43
+    },
+    {
+      "id": "T04-B-03",
+      "tarea": "T04-alta-de-socios",
+      "version": "B",
+      "repeticion": 3,
+      "orden": 44
+    },
+    {
+      "id": "T01-B-03",
+      "tarea": "T01-cancelar-reserva",
+      "version": "B",
+      "repeticion": 3,
+      "orden": 45
+    },
+    {
+      "id": "T02-A-03",
+      "tarea": "T02-filtrar-clases",
+      "version": "A",
+      "repeticion": 3,
+      "orden": 46
+    },
+    {
+      "id": "T04-A-03",
+      "tarea": "T04-alta-de-socios",
+      "version": "A",
+      "repeticion": 3,
+      "orden": 47
+    },
+    {
+      "id": "T03-B-03",
+      "tarea": "T03-exportar-ocupacion",
+      "version": "B",
+      "repeticion": 3,
+      "orden": 48
+    },
+    {
+      "id": "T02-A-04",
+      "tarea": "T02-filtrar-clases",
+      "version": "A",
+      "repeticion": 4,
+      "orden": 49
+    },
+    {
+      "id": "T04-B-04",
+      "tarea": "T04-alta-de-socios",
+      "version": "B",
+      "repeticion": 4,
+      "orden": 50
+    },
+    {
+      "id": "T05-B-04",
+      "tarea": "T05-recordatorios",
+      "version": "B",
+      "repeticion": 4,
+      "orden": 51
+    },
+    {
+      "id": "T06-A-04",
+      "tarea": "T06-lista-de-espera",
+      "version": "A",
+      "repeticion": 4,
+      "orden": 52
+    },
+    {
+      "id": "T03-A-04",
+      "tarea": "T03-exportar-ocupacion",
+      "version": "A",
+      "repeticion": 4,
+      "orden": 53
+    },
+    {
+      "id": "T03-B-04",
+      "tarea": "T03-exportar-ocupacion",
+      "version": "B",
+      "repeticion": 4,
+      "orden": 54
+    },
+    {
+      "id": "T01-A-04",
+      "tarea": "T01-cancelar-reserva",
+      "version": "A",
+      "repeticion": 4,
+      "orden": 55
+    },
+    {
+      "id": "T07-A-04",
+      "tarea": "T07-compra-de-creditos",
+      "version": "A",
+      "repeticion": 4,
+      "orden": 56
+    },
+    {
+      "id": "T08-B-04",
+      "tarea": "T08-convenios",
+      "version": "B",
+      "repeticion": 4,
+      "orden": 57
+    },
+    {
+      "id": "T02-B-04",
+      "tarea": "T02-filtrar-clases",
+      "version": "B",
+      "repeticion": 4,
+      "orden": 58
+    },
+    {
+      "id": "T07-B-04",
+      "tarea": "T07-compra-de-creditos",
+      "version": "B",
+      "repeticion": 4,
+      "orden": 59
+    },
+    {
+      "id": "T04-A-04",
+      "tarea": "T04-alta-de-socios",
+      "version": "A",
+      "repeticion": 4,
+      "orden": 60
+    },
+    {
+      "id": "T05-A-04",
+      "tarea": "T05-recordatorios",
+      "version": "A",
+      "repeticion": 4,
+      "orden": 61
+    },
+    {
+      "id": "T06-B-04",
+      "tarea": "T06-lista-de-espera",
+      "version": "B",
+      "repeticion": 4,
+      "orden": 62
+    },
+    {
+      "id": "T01-B-04",
+      "tarea": "T01-cancelar-reserva",
+      "version": "B",
+      "repeticion": 4,
+      "orden": 63
+    },
+    {
+      "id": "T08-A-04",
+      "tarea": "T08-convenios",
+      "version": "A",
+      "repeticion": 4,
+      "orden": 64
+    },
+    {
+      "id": "T07-A-05",
+      "tarea": "T07-compra-de-creditos",
+      "version": "A",
+      "repeticion": 5,
+      "orden": 65
+    },
+    {
+      "id": "T01-A-05",
+      "tarea": "T01-cancelar-reserva",
+      "version": "A",
+      "repeticion": 5,
+      "orden": 66
+    },
+    {
+      "id": "T03-A-05",
+      "tarea": "T03-exportar-ocupacion",
+      "version": "A",
+      "repeticion": 5,
+      "orden": 67
+    },
+    {
+      "id": "T06-B-05",
+      "tarea": "T06-lista-de-espera",
+      "version": "B",
+      "repeticion": 5,
+      "orden": 68
+    },
+    {
+      "id": "T08-A-05",
+      "tarea": "T08-convenios",
+      "version": "A",
+      "repeticion": 5,
+      "orden": 69
+    },
+    {
+      "id": "T08-B-05",
+      "tarea": "T08-convenios",
+      "version": "B",
+      "repeticion": 5,
+      "orden": 70
+    },
+    {
+      "id": "T04-A-05",
+      "tarea": "T04-alta-de-socios",
+      "version": "A",
+      "repeticion": 5,
+      "orden": 71
+    },
+    {
+      "id": "T05-B-05",
+      "tarea": "T05-recordatorios",
+      "version": "B",
+      "repeticion": 5,
+      "orden": 72
+    },
+    {
+      "id": "T04-B-05",
+      "tarea": "T04-alta-de-socios",
+      "version": "B",
+      "repeticion": 5,
+      "orden": 73
+    },
+    {
+      "id": "T06-A-05",
+      "tarea": "T06-lista-de-espera",
+      "version": "A",
+      "repeticion": 5,
+      "orden": 74
+    },
+    {
+      "id": "T03-B-05",
+      "tarea": "T03-exportar-ocupacion",
+      "version": "B",
+      "repeticion": 5,
+      "orden": 75
+    },
+    {
+      "id": "T01-B-05",
+      "tarea": "T01-cancelar-reserva",
+      "version": "B",
+      "repeticion": 5,
+      "orden": 76
+    },
+    {
+      "id": "T02-B-05",
+      "tarea": "T02-filtrar-clases",
+      "version": "B",
+      "repeticion": 5,
+      "orden": 77
+    },
+    {
+      "id": "T02-A-05",
+      "tarea": "T02-filtrar-clases",
+      "version": "A",
+      "repeticion": 5,
+      "orden": 78
+    },
+    {
+      "id": "T07-B-05",
+      "tarea": "T07-compra-de-creditos",
+      "version": "B",
+      "repeticion": 5,
+      "orden": 79
+    },
+    {
+      "id": "T05-A-05",
+      "tarea": "T05-recordatorios",
+      "version": "A",
+      "repeticion": 5,
+      "orden": 80
+    }
+  ]
+}

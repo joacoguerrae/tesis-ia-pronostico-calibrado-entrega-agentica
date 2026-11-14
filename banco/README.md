@@ -8,6 +8,7 @@ Las pruebas que se hicieron con el banco y sus resultados están en [NOTAS.md](N
 
 - `app/`: Pulso en su estado inicial (FastAPI y SQLite, con 11 tests propios). Cada corrida arranca de una copia limpia.
 - `tareas/Txx/pedido.md`: el pedido que recibe el agente.
+- `tareas/Txx/inicial/`: si existe, archivos que se ponen encima de la app antes de la corrida, por ejemplo un bug plantado. Entran en el commit inicial, así el diff de la corrida muestra solo lo que hizo el agente.
 - `tareas/Txx/aceptacion/`: los tests de aceptación. Se copian al repo de la corrida recién al evaluar.
 - `tareas/Txx/solucion/`: una solución de referencia, para comprobar que los tests están bien.
 - `tareas/_comun/`: fixtures compartidas por los tests de aceptación.
@@ -28,6 +29,11 @@ Las pruebas que se hicieron con el banco y sus resultados están en [NOTAS.md](N
 | T06 | C2-L | Lista de espera, con cancelación y ampliación de cupo desde recepción | El orden de llegada, saltear al que no tiene créditos, varios lugares a la vez, no asignar después del inicio | 16 |
 | T07 | C3-L | Compra de créditos con una pasarela de pagos externa: pago, webhook y conciliación | No confiar en el webhook, la idempotencia, el 502 que deja la compra pendiente, que una falla no corte la conciliación | 16 |
 | T08 | C3-S | Plan corporativo validado contra un servicio de beneficios externo | El piso de créditos, el email codificado en la URL, el 503 sin cambios, que una falla no corte la revalidación | 14 |
+| T09 | C2-S | Diagnosticar y arreglar horarios corridos, a partir de reportes de socios (bug plantado en `inicial/`) | Arreglar el síntoma y no la causa, no migrar las clases ya guardadas, correr dos veces la migración, las fechas viejas sin zona | 13 |
+| T10 | C2-S | Que las reservas respeten cupo, créditos y reservas repetidas con pedidos simultáneos de varios procesos | Un candado que solo sirve dentro de un proceso, el correo dentro de la transacción (base bloqueada), los 500 por base ocupada | 9 |
+| T11 | C2-L | Series semanales: crear, cambiar de una clase en adelante y cancelar una clase | El día de la semana en hora de Montevideo, los días de cierre, la base vieja sin las columnas nuevas, rechazar el cambio entero | 37 |
+
+T09 a T11 se armaron para que fallen más seguido: cada una prueba un tipo de dificultad distinto (diagnóstico, concurrencia y lógica de calendario). Su dificultad todavía no está medida; ver NOTAS.md.
 
 La clase sigue la taxonomía de capabilities de Rootshift, nivel por tamaño. C1 es un solo flujo, C2 tiene reglas y estado propios, y C3 depende de un sistema externo que es la fuente de verdad. La clasificación es tentativa hasta tener el documento de la taxonomía. En T07 y T08, los tests reemplazan el sistema externo por un servidor falso en `127.0.0.1`.
 
@@ -78,5 +84,6 @@ El corredor usa solo la clave de `ANTHROPIC_API_KEY`. En modo `--bare`, Claude C
 
 ## Pendiente
 
-- Llegar a 15 tareas, con tareas más difíciles. En el piloto, las 8 se resolvieron en todas las corridas.
+- Llegar a 15 tareas, con tareas más difíciles. En el piloto, las 8 se resolvieron en todas las corridas, también con Haiku 5.5.
+- Medir la dificultad de T09 a T11 con `experimentos/calibracion-t09-t11.json` y quedarse con las que A resuelve entre el 20 % y el 80 % de las veces.
 - Confirmar la clasificación con el documento de la taxonomía de Rootshift.

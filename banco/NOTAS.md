@@ -38,3 +38,15 @@ El ruido entre corridas de una misma tarea es menor que en DeepSWE en todas las 
 | Duración | 0,094 | 0,232 |
 
 Son desvíos en escala logarítmica. Con 15 tareas y 5 corridas por versión (150 corridas, unos 19 dólares por comparación), el generador detectaría en el 80 % de los casos cambios de 7 % a 12 % en el costo y de 6 % a 13 % en la duración. El rango va de un efecto parejo entre tareas a uno que varía entre tareas como en DeepSWE.
+
+## Tareas difíciles: T09 a T11 (14/11/2026)
+
+En la comparación `a-vs-b-haiku` (Sonnet 5.5 contra Haiku 5.5), las 80 corridas resolvieron sus tareas. Ni siquiera T07, la más larga, distingue versiones. Agregar reglas al pedido no alcanza, así que cada tarea nueva prueba un tipo de dificultad distinto:
+
+- **T09, diagnóstico.** El pedido son reportes de socios, no una especificación, y el bug está plantado en `tareas/T09/inicial/`. Hay dos defectos que se combinan: el panel nuevo guarda la hora con desfase y `a_fecha` le pisa la zona. Arreglar uno solo, o no migrar las clases ya guardadas, deja tests en rojo (comprobado con tres arreglos a medias: fallan entre 4 y 8 de los 13 tests).
+- **T10, concurrencia.** Pedidos simultáneos con hilos y con 4 procesos separados (`aceptacion/proceso_que_reserva.py`). Un candado de `threading` pasa los tests de hilos pero falla los de procesos: 10 de 10 veces, gracias a que los pedidos salen en 5 olas. La solución de referencia pasó 50 de 50 evaluaciones y la base falló 8 de 8.
+- **T11, calendario.** Series semanales con días de cierre, cambios de una clase en adelante y cancelaciones. Incluye una base de producción sin las columnas nuevas.
+
+Para que una tarea arranque de una app distinta de la base, el corredor y `verificar.py` aplican `tareas/Txx/inicial/` encima de `app/`.
+
+Falta la prueba ciega de estas tres tareas y medir su dificultad con `experimentos/calibracion-t09-t11.json` (5 corridas de A por tarea).

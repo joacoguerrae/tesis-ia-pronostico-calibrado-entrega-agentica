@@ -1,0 +1,209 @@
+diff --git a/README.md b/README.md
+index 5e8695a..d357291 100644
+--- a/README.md
++++ b/README.md
+@@ -30,7 +30,7 @@ python -m pytest
+ 
+ | Método | Ruta | Qué hace |
+ |---|---|---|
+-| GET | `/clases` | Clases que todavía no empezaron, ordenadas por inicio, con `lugares_libres`. |
++| GET | `/clases` | Clases que todavía no empezaron, ordenadas por inicio, con `lugares_libres`. Filtros opcionales: `desde`/`hasta` (YYYY-MM-DD, día en Montevideo), `instructor` (nombre exacto, sin distinguir mayúsculas), `con_lugar=true`, y paginado con `pagina` (default 1) y `por_pagina` (1–50, default 20). El total antes de paginar va en el header `X-Total`. |
+ | GET | `/clases/{id}` | Una clase. |
+ | POST | `/admin/clases` | Crea una clase (admin). |
+ | POST | `/reservas` | Reserva una clase: descuenta un crédito y manda el correo de confirmación. |
+diff --git a/pulso/main.py b/pulso/main.py
+index 039212d..82a4b87 100644
+--- a/pulso/main.py
++++ b/pulso/main.py
+@@ -1,12 +1,15 @@
+ import os
++from datetime import date
+ 
+-from fastapi import APIRouter, Depends, FastAPI, Header, HTTPException
++from fastapi import APIRouter, Depends, FastAPI, Header, HTTPException, Query, Response
+ from pydantic import AwareDatetime, BaseModel, Field
+ 
+ from pulso import correo, db, reloj
+ 
+ router = APIRouter()
+ 
++FORMATO_FECHA = r'^\d{4}-\d{2}-\d{2}$'
++
+ 
+ def socio_actual(authorization: str | None = Header(default=None)):
+     if not authorization or not authorization.startswith('Bearer '):
+@@ -30,10 +33,49 @@ def ver_reserva(reserva):
+     return {k: reserva[k] for k in ('id', 'clase_id', 'estado', 'creada')}
+ 
+ 
++def fecha_de_parametro(texto):
++    if texto is None:
++        return None
++    try:
++        return date.fromisoformat(texto)
++    except ValueError:
++        raise HTTPException(422, 'La fecha debe tener formato YYYY-MM-DD')
++
++
+ @router.get('/clases')
+-def listar_clases():
++def listar_clases(response: Response,
++                  desde: str | None = Query(default=None, pattern=FORMATO_FECHA),
++                  hasta: str | None = Query(default=None, pattern=FORMATO_FECHA),
++                  instructor: str | None = None,
++                  con_lugar: bool = False,
++                  pagina: int = Query(default=1, ge=1),
++                  por_pagina: int = Query(default=20, ge=1, le=50)):
++    desde_dia = fecha_de_parametro(desde)
++    hasta_dia = fecha_de_parametro(hasta)
++    if desde_dia and hasta_dia and desde_dia > hasta_dia:
++        raise HTTPException(422, 'desde no puede ser posterior a hasta')
++
+     ahora = reloj.ahora()
+-    return [ver_clase(c) for c in db.clases() if db.a_fecha(c['inicio']) > ahora]
++    nombre_instructor = instructor.casefold() if instructor is not None else None
++    candidatas = []
++    for c in db.clases():
++        inicio = db.a_fecha(c['inicio'])
++        if inicio <= ahora:
++            continue
++        dia = inicio.astimezone(reloj.MONTEVIDEO).date()
++        if desde_dia and dia < desde_dia:
++            continue
++        if hasta_dia and dia > hasta_dia:
++            continue
++        if nombre_instructor is not None and c['instructor'].casefold() != nombre_instructor:
++            continue
++        if con_lugar and ver_clase(c)['lugares_libres'] <= 0:
++            continue
++        candidatas.append(c)
++
++    response.headers['X-Total'] = str(len(candidatas))
++    inicio_pagina = (pagina - 1) * por_pagina
++    return [ver_clase(c) for c in candidatas[inicio_pagina:inicio_pagina + por_pagina]]
+ 
+ 
+ @router.get('/clases/{clase_id}')
+diff --git a/tests/test_filtros_clases.py b/tests/test_filtros_clases.py
+new file mode 100644
+index 0000000..3ce6809
+--- /dev/null
++++ b/tests/test_filtros_clases.py
+@@ -0,0 +1,117 @@
++from datetime import datetime, timedelta, timezone
++
++from conftest import AHORA
++from pulso import db, reloj
++
++MVD = reloj.MONTEVIDEO
++
++
++def nombres(r):
++    return [c['nombre'] for c in r.json()]
++
++
++def mvd(*args):
++    return datetime(*args, tzinfo=MVD)
++
++
++def test_filtra_por_rango_de_dias_inclusive(cliente):
++    db.crear_clase('Antes', 'Leo', mvd(2026, 11, 11, 23, 59))
++    db.crear_clase('Desde', 'Leo', mvd(2026, 11, 12, 0, 0))
++    db.crear_clase('Hasta', 'Leo', mvd(2026, 11, 14, 23, 59))
++    db.crear_clase('Despues', 'Leo', mvd(2026, 11, 15, 0, 0))
++    r = cliente.get('/clases', params={'desde': '2026-11-12', 'hasta': '2026-11-14'})
++    assert r.status_code == 200
++    assert nombres(r) == ['Desde', 'Hasta']
++    assert r.headers['X-Total'] == '2'
++
++
++def test_dia_se_calcula_en_montevideo_y_no_en_utc(cliente):
++    # 2026-11-13 02:30 UTC es el 12/11 a las 23:30 en Montevideo.
++    db.crear_clase('Noche', 'Leo', datetime(2026, 11, 13, 2, 30, tzinfo=timezone.utc))
++    assert nombres(cliente.get('/clases', params={'desde': '2026-11-12', 'hasta': '2026-11-12'})) == ['Noche']
++    assert nombres(cliente.get('/clases', params={'desde': '2026-11-13'})) == []
++
++
++def test_desde_y_hasta_por_separado(cliente):
++    db.crear_clase('Uno', 'Leo', mvd(2026, 11, 12, 10))
++    db.crear_clase('Dos', 'Leo', mvd(2026, 11, 20, 10))
++    assert nombres(cliente.get('/clases', params={'desde': '2026-11-15'})) == ['Dos']
++    assert nombres(cliente.get('/clases', params={'hasta': '2026-11-15'})) == ['Uno']
++
++
++def test_filtra_por_instructor_sin_distinguir_mayusculas(cliente):
++    db.crear_clase('Spinning', 'Leo Pérez', AHORA + timedelta(hours=2))
++    db.crear_clase('Yoga', 'Sofía', AHORA + timedelta(hours=3))
++    assert nombres(cliente.get('/clases', params={'instructor': 'leo pérez'})) == ['Spinning']
++    assert nombres(cliente.get('/clases', params={'instructor': 'LEO PÉREZ'})) == ['Spinning']
++    # Nombre exacto: no hay coincidencia parcial.
++    assert nombres(cliente.get('/clases', params={'instructor': 'Leo'})) == []
++
++
++def test_con_lugar_deja_solo_clases_con_lugares_libres(cliente):
++    llena = db.crear_clase('Llena', 'Leo', AHORA + timedelta(hours=2), cupo=1)
++    db.crear_reserva(db.crear_socio('Juan', 'juan@example.com')['id'], llena['id'], AHORA)
++    db.crear_clase('Libre', 'Leo', AHORA + timedelta(hours=3), cupo=1)
++    assert nombres(cliente.get('/clases', params={'con_lugar': 'true'})) == ['Libre']
++    assert nombres(cliente.get('/clases', params={'con_lugar': 'false'})) == ['Llena', 'Libre']
++    assert nombres(cliente.get('/clases')) == ['Llena', 'Libre']
++
++
++def test_combina_filtros(cliente):
++    db.crear_clase('Buscada', 'Leo', mvd(2026, 11, 12, 10))
++    db.crear_clase('Otro instructor', 'Sofía', mvd(2026, 11, 12, 11))
++    db.crear_clase('Otro dia', 'Leo', mvd(2026, 11, 20, 10))
++    r = cliente.get('/clases', params={'desde': '2026-11-12', 'hasta': '2026-11-14',
++                                       'instructor': 'leo', 'con_lugar': 'true'})
++    assert nombres(r) == ['Buscada']
++    assert r.headers['X-Total'] == '1'
++
++
++def test_no_lista_clases_empezadas_aunque_esten_en_el_rango(cliente):
++    db.crear_clase('Empezada', 'Leo', AHORA - timedelta(minutes=1))
++    r = cliente.get('/clases', params={'desde': '2026-11-10', 'hasta': '2026-11-10'})
++    assert nombres(r) == []
++    assert r.headers['X-Total'] == '0'
++
++
++def test_pagina_y_por_pagina(cliente):
++    for i in range(5):
++        db.crear_clase(f'Clase {i}', 'Leo', AHORA + timedelta(hours=i + 1))
++    r = cliente.get('/clases', params={'pagina': 2, 'por_pagina': 2})
++    assert r.status_code == 200
++    assert nombres(r) == ['Clase 2', 'Clase 3']
++    assert r.headers['X-Total'] == '5'
++    assert nombres(cliente.get('/clases', params={'pagina': 3, 'por_pagina': 2})) == ['Clase 4']
++    fuera_de_rango = cliente.get('/clases', params={'pagina': 9, 'por_pagina': 2})
++    assert fuera_de_rango.status_code == 200
++    assert fuera_de_rango.json() == []
++    assert fuera_de_rango.headers['X-Total'] == '5'
++
++
++def test_valores_por_defecto(cliente):
++    for i in range(25):
++        db.crear_clase(f'Clase {i:02}', 'Leo', AHORA + timedelta(hours=i + 1))
++    r = cliente.get('/clases')
++    assert len(r.json()) == 20
++    assert r.headers['X-Total'] == '25'
++    assert len(cliente.get('/clases', params={'por_pagina': 50}).json()) == 25
++
++
++def test_orden_por_inicio_y_luego_id(cliente):
++    misma_hora = AHORA + timedelta(hours=2)
++    primera = db.crear_clase('Primera', 'Leo', misma_hora)
++    segunda = db.crear_clase('Segunda', 'Leo', misma_hora)
++    db.crear_clase('Temprana', 'Leo', AHORA + timedelta(hours=1))
++    ids = [c['id'] for c in cliente.get('/clases').json()]
++    assert ids[1:] == [primera['id'], segunda['id']]
++
++
++def test_rangos_de_paginado_invalidos(cliente):
++    for params in ({'pagina': 0}, {'por_pagina': 0}, {'por_pagina': 51}, {'pagina': 'uno'}):
++        assert cliente.get('/clases', params=params).status_code == 422, params
++
++
++def test_fechas_invalidas(cliente):
++    for params in ({'desde': '12/11/2026'}, {'hasta': '2026-11-1'}, {'desde': '2026-13-01'},
++                   {'desde': '2026-11-12T00:00:00'}, {'desde': '2026-11-14', 'hasta': '2026-11-12'}):
++        assert cliente.get('/clases', params=params).status_code == 422, params

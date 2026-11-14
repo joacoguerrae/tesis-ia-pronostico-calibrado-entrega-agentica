@@ -1,0 +1,23 @@
+{
+  "tarea": "T08-convenios",
+  "tests": 14,
+  "pasados": 14,
+  "exito": true,
+  "pasaron": [
+    "test_activar_pide_token_y_empresa",
+    "test_empleado_activo_pasa_a_corporativo",
+    "test_los_creditos_suben_hasta_12_sin_sumarse",
+    "test_correo_al_activar",
+    "test_activar_dos_veces_da_409_sin_cambios",
+    "test_si_no_es_empleado_activo_da_409_sin_cambios",
+    "test_empresa_inexistente_da_404_sin_cambios",
+    "test_si_el_servicio_responde_con_error_da_503_sin_cambios",
+    "test_si_el_servicio_no_esta_da_503_sin_cambios",
+    "test_el_email_va_en_minusculas_y_codificado",
+    "test_el_servicio_es_la_fuente_de_verdad",
+    "test_cada_clave_va_a_su_lugar",
+    "test_revalidar_baja_a_los_que_ya_no_son_empleados",
+    "test_una_falla_no_frena_la_revalidacion"
+  ],
+  "fallidos": []
+}

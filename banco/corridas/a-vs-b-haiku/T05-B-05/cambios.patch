@@ -1,0 +1,745 @@
+diff --git a/README.md b/README.md
+index 5e8695a..83a5559 100644
+--- a/README.md
++++ b/README.md
+@@ -33,6 +33,7 @@ python -m pytest
+ | GET | `/clases` | Clases que todavía no empezaron, ordenadas por inicio, con `lugares_libres`. |
+ | GET | `/clases/{id}` | Una clase. |
+ | POST | `/admin/clases` | Crea una clase (admin). |
++| POST | `/admin/recordatorios` | Manda el recordatorio por correo de las reservas confirmadas cuya clase empieza en las próximas 24 h. Se llama cada 15 min; cada reserva recibe uno solo (admin). |
+ | POST | `/reservas` | Reserva una clase: descuenta un crédito y manda el correo de confirmación. |
+ | GET | `/reservas` | Reservas del socio, ordenadas por el inicio de la clase. |
+ | GET | `/yo` | Datos del socio y créditos que le quedan. |
+diff --git a/pulso/__pycache__/__init__.cpython-311.pyc b/pulso/__pycache__/__init__.cpython-311.pyc
+new file mode 100644
+index 0000000000000000000000000000000000000000..1dbb8fcb4d9aaceba75bf898aadb0d3e80ef98e6
+GIT binary patch
+literal 160
+zcmZ3^%ge<81phYw$O6%iK?DpiLK&agfQ;!3DGb33nv8xc8H$*I{LdiCU&i_+xdr-3
+ziFwKSx*-Opx=y-4qOz*I($cWZP`@a(AYZ?rG^aRUKR!M)FS8^*Uaz3?7l%!5eoARh
+ds$CH)&<v0*#r#0x12ZEd;|B&9QN#=s0|5D2B!d6|
+
+literal 0
+HcmV?d00001
+
+diff --git a/pulso/__pycache__/correo.cpython-311.pyc b/pulso/__pycache__/correo.cpython-311.pyc
+new file mode 100644
+index 0000000000000000000000000000000000000000..b4fa98cdae687bd6a545b02b3aa03a5a55d4ac2f
+GIT binary patch
+literal 1393
+zcmaJ=-)j^{9G}@AcS-KFh+1exGZ3O4CfPehX;ZO8a@s(10TTs7;TU(udgt!Wc6K*E
+zjuZ0GmlmNfg$N>~FDWJUq13+gP5KX<66mo|DD<gsk@ygNkbY<PvKlRZXZU=-^PTU^
+zcjh~v`ElRA0R-~$*PZ5h4WWP3U{_$A$o6qitB9d_#4ytw>}vCxtIz8gG5u>aZ!iPU
+zWaca?<)S(SU!)%6O-dLi0d*QIv1}nF7r_|0>JeWGn+JkWpURLEhmr+q|M8H1qD<=h
+zBoK}uUq)2ITAM0JRuhQ&VeDUZtdbUM>_%)#?ue$XD_2hnpw)Q03$Thp-1CEKX7)Oa
+zHnNGc=#Jjj*LH85`IW(N8?|v;+p|xWFYJF6+%$LXy}PeN){QLlO=BJMY-G8hib;Fh
+zJBx-;1qH^UwxnN2ix{Kp2t#8CDy`L8m!@j7)hlyksx~*%D^NgALP_Zep+V$@VuaWc
+zm%h@HQzlB}+QjEqtFz?frz51-OQoDt*NOXV;qj%0@ZvmQ;&v4BI8W;#UkZgZRDelu
+z2}w&vY^WS@F3l0=(j2i4>jM=?Kwea=(Dkhw)U(CtT>0$i#ZiFe*5dNVm4%8Wxi2g~
+zaspwcFFWQh$2smTG^mvC!5*rV!S4Vo=&%05-6P)|y?b;EY35~oZ>ZZ>_^$A6p>ybq
+z?%@yaom)Hi@bu5)zwt-6e{mnVPfks4o|^0&sy@?k|7H9fDcnj?SL@SVQhb)|_&mYa
+z{qMGSc6Qz!kj@4N;P~HPm>AR_4;m9g`NzjGpq&u`W>vKks$KzO6}8bC=(i=z$O073
+z?7g(QgWH(l`v%iM>-UWZI*`O@O<fYwrJ*2SMVv$d^@t;aU9yam6P2=6sSpbPE+CbU
+z#?O>bj1cY-_0a13P75#O3k}A_Sj!w{*09^k_o89^+4%5uNsk9;5H?)i0{Wyx8JM1_
+z%~h{WO;%^%o912Nav)=DI>M$-pe{g&+z%=)-sJWzT3@cKgz_-B)b9;W1FWFGiwFNK
+z9(!6m_8{6Ew4M~po5k`<wY&ddr(mUhZ8$SKhP4f=P_2}U^YuCtcD){(3B?k6Cnrm&
+zm8AIz$@d{TImL^<^R8f#!!O7W!KWT5r~z#07~?MD9mKonNaz3hR!+x?Qm<iA$7SVs
+I6Ow%Y0hn7xrT_o{
+
+literal 0
+HcmV?d00001
+
+diff --git a/pulso/__pycache__/db.cpython-311.pyc b/pulso/__pycache__/db.cpython-311.pyc
+new file mode 100644
+index 0000000000000000000000000000000000000000..540df74a8c089d534b2786df16d27eb43d42d3f0
+GIT binary patch
+literal 10425
+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
+WvL=9kDx@Yw3bq}hv6K_8)&C2hOZZ>_
+
+literal 0
+HcmV?d00001
+
+diff --git a/pulso/__pycache__/main.cpython-311.pyc b/pulso/__pycache__/main.cpython-311.pyc
+new file mode 100644
+index 0000000000000000000000000000000000000000..edfb690d1b2b83f2dc61243e7a21e9a4b93754f6
+GIT binary patch
+literal 9840
+zcmcIJTWlLgk~8G+Ar47Nv>vu4OJhA8bNx_c$Im#9Wj!oemSV|vykRb;$DENxi4Ubo
+z+7?$ja03C67uo}Zb6_sk0hB{F=iK_RK5PPL0Ur=t_71s^JIn}kh%kVF0EYnUKLy^8
+zz(03YJ$wyiErJ8CHB;*8uCD5?uCA&s{=LWJVxV;W=MPh)nqmGMKMKW>uRJ?#WtjVn
+z#7Jy}3E+QAgpFDP78dK)h&9RuxTq~)i`oPBs3YKrIs;DH$3?25u7E4b2l%Kv;HGW1
+zh$rd|c%#*U>S#@%hGi^_%zX;1ep}$n1ZttpA+e9_pR&*nuTdsg$szkBHVreIut?4Y
+zTVUIkm{nz%F2Jml_ys0VFS!9W$hFIj1*+x$C6Ae-<XvDY=C*yyvDFo0Yvdg;%i4v?
+z)$Oz}=NQSiz)0I<{!@_cZ{amcpb4lq7rx5>OLbB`tkovhnYr9#A2pb1NR4t6@ZG+N
+z?=H%B2k_mwiEqo6e4C{DN6nvFV3zP2h0bG}c^<GgjdBa{-L+t=kXY-Mv|F}VQLCAs
+zBy8FRVar`;GS6#^x$a(ID`vTSONwnjiemdFifvK{=vuqPUSj;6Pf>KEepatahNH41
+zN0Or7rdRb`92$?Ok}}a9ee#SPlM=dPKujc|UAGU)q69sj!ONE~_TLG~Gs$o~=C|se
+zp4%dk`^2P-wDhX8VnQB?15MpF5SAknpx8rkLgct^k#6WVB1hs=z}g|n6Jjco)IDM<
+zIT<J6w1^Z##RCRYw84w&`0U>R+-K$(Qa{HmLw$3RShHXfHOZnPGhient9cvWW0Ocd
+zU#5z<K%XnLmjAD$Z{{}7&as(Fj$9?jITXHaH0?MmgUE>R^aEII+B+bE`~^88B;(U^
+zECrU2xr{X-9J}?^$C0oUhs|*%k|IeaZikbT#0eP013<4%#6#hDa3)TIbg=Fwax{KR
+zo+0u?_>SK~Y7omtu@ZP>1mSsCS28-&bwiAW;s-9jeB{8{0{~{zw`Wgu-|Frn@=UyI
+zCKXA<yP{$^c5r4^cN<K^P%<S($abLOhBpxgkYU#N?HdehJG|`qMmWAI9ADX?3cZ@p
+zOB>g{O}SoWcem<2q<If1&O_^NujX#a&41H+Vzu?eieGK*(^~sfcfaQD&-AZ3+?o0O
+zm_w@fu;x9iI1jJ!HJJ;~fElCncY>l64ab7h@~lZwaLcHo%s_=IO8Xp>#4-6YRaC3x
+zqU9*`;s46*ou&#wYLW%NgE%ixB8h=5<wo`Di&rjOdL!7=H!?ID9PWRM_+UV)4M1;1
+zyd?{gEYO*U6G<Y5!e9Nqw7a68(=Bm0YI5vWn8ahc^`@Mpd+cY)PN0y$xeEk+gl?l$
+zhye9^coU}q;3hPnyw9<@egEitwDWf@|InfwA5#72HUIh5o#&OE=krqSSG@z8cR+Ct
+zY*?A5VHSGG4j^F?CaM<|<^)vkGs&Xp7&w7*ASxVTl=3q+RTM1XSV}nNladA(|ES_D
+z8Y1LEsTr^lVF`?bH<G#uM<fx9gm1t<upyij4kZnx=R@(>M3_WHNlXB)EffKhQ!b>c
+zTQUjKR<al7NoBYnDj8;-ug=<*<%a{GM8CN4dF;z8U%&Flx7DL#+R-s}&zQoGtNgge
+zk1O2xX0hP%s8|H3ybpp|WWdj`3r@+>SK*goLDo@|OwrbCgZCM##E0yCCJd5%hex|{
+z*D_Zo(Z97Uxi2xFF=QVg!n!R7U)I@a-2qaN$t^K~GZ2If)rRM;Qz(^CJUVka-HMCO
+zV;wvdiHF2U;`G51LMseRAowA}DExWj$%%_Si?_4yE~Sf2bm4xEv;(T{q*4rqCEYHA
+z0g~ci%LzCF(U=}f4kA@lkn4ti@@2CihoQX%5fA{|wE|mY);<JK<<DzS=L{`OJGzX$
+z3;}+z;EM5mHVFXbUapX(b8YsZzbNj`i_N?l`vv=FG4G!pc+>rxf(q{6P29h(dG^JV
+znPVkps}pe7GL7bn`JGTcwYdua^?_ySWl$qlw})e4u<?GYq5KXpI3b57MXK4*h<dHF
+zAutT!LpP~M1niBW9=owB=8r|9OhJk$oj@sZ3;<OSI1KpY#=h`<zH_B#W%9|e+C8Xs
+z4}N`Qwfmydeest=S@G_Lr3+9so`T|dfdn~$fVwEVv87<ku#M`<8ADe*rYVtA(2b`f
+zfjR|q_|9FsG<<htX#^Ytor^J}-?V+=|9Iag``}CE$292S#whEwFRwjaKPzbMJb4*t
+znGRynQ$(O=D_xpn%tkBk-pc|8iIpss?!DYsRBk7=2v6_9NqO!YjSKP}*bP~ThytA|
+z95<8|c?kja?r68bedF|LYu<V11sA`Olw(C3cLtCUKXC*A%FVkpnEk2hZUI+ocB)5I
+z?@`TrRB;|%=j*apRK7{$n-s3eFm^DySn$AMdG>bz?lUqI0F4e<uHXg93YQ^^SwH~}
+zE(3PSihH;PhJ#{oh#@-x*H*-}KXO!1tCC%S;rt62JjJL&49Nw;<#pF+O1>rbqAz%g
+z1__Ri3qys79J`sE)a|i&6kLh!3dg_&r$R{xNsj^=L9-6HmYYf4Ev3*o$74YlNKh9?
+z{chbE493K$91QBNU@#h&QW31XgTZ$p95Q+ckCgfW=vJVvR|kV)EEZ4Fh&B-nk^$_m
+zLNG{?!m%W!Pt7QmKHXVz7Euu3#wV5lWXk^5e2v-8<!;5-srouKUuR}uu~*?b;ZeEH
+zwT7mwy!@`x;8z>`T7y4xK5JDtKRhbuUvuwJIDAxY$J+K?Ioon=j{g<^fX`gWwksSy
+zD%ZYNQ=hfvYP0+Y{5?L?w+PLs9V&$dHKEf>d%9>Kl0R`z{~c!Px9B{Wm}Dvu3_<)4
+z(xi6?ITi}b3Ed`%$#}wa6j9NsVZQ+t^HF?pTp_XOHJ1yz38PBIY|uYp|E9v8f{s{5
+z4X?#f+gXSuz@6o-BIpa=TY^$5Is@iv9Eg`i734B}Q*azRjCkTZzV5^Ed)Jiu6Ywm{
+z-|RWMy6336=eV}#xY4HaCpG@0!kzpJM-1bW@*^f&WlmzLYFp55=x(ao<3<EPZNjME
+zMuu=c=MfAe7)3CG03(Moow|yj2wsCXfnLd^Q{LLlNM_{c@McDgQHYzaf}4O5aeyc;
+zLQBX3piofX4WA6~ea^gjC7(RUl!8L@5&s2umxBvad360Ei&_?XPH_e1cR9(rm2;i9
+z%vq8+yL_2K$4!e_L8d9?iuj(BY@2L4-p2A}k%M^8zTh;ud{kmuz~wu(npI_dVV1?F
+zSvWV%qFfGWMrZ*!Y{?P&s!Fq&rk-mPA6F$GSOZ@gCAp_5pH1UDmE%kjp*cJpXqJe1
+zwm)W%%$cNltBFf-kIh^puX%1PlPoQWnL;m13yi8Rbx1WZyV}zCuOTC58iz5BF|NY#
+z{hIlRlePgh^XR%w^y;Cd!Nj5QBZql~FjtJv^JUIz))KG;+eZoB_sHuA(0PS_1&Wcv
+zxb#9kk`QJglMtPe(_j7GWNY#8U^xB^t=Na`FvEh$fe5w@L!0tg^{%D-em6}IeVhlJ
+zvKyUbHQL`~?z1ej)Gl!_Ihzrzv;%$84M2C5u4#G0TZmSP5z?RmDPCo&PTho%=FSW`
+zoo>oo9#R&i7CO=B(M#_Se`5XwhD>oq;rY5}v3oJF^jfZex#Pj`D*uwgpL^KzaPrac
+z%Bj`;=M1EBXc#)2YYM~Ow?qK~s;@pv2&tGT<k<@|A^~B7OEZEr>af#|MM=lvLNW|<
+z7U*3Su1Z9f!r<dbFOqEl0D&F^dGDrVNsI|0^3`Xw|LOlg(QPuMS0d@Uyj2%U!a6C?
+zNa8t%DWT`K!8k;TY2SV%B`0QNB1Yp00kT8SZ8%7vvBh)tpueUphNN*LnkI4#K`|uP
+ztzv9e=L@Di2pPRSfS`NuR#&_}>fS^uie9m>A~)jLF+U*^-A(Tw!Py{QIOrV@_8y%j
+z!8IE}6^8J}CZpvMpyXqIXJKy%UZi^9O*{e}{-F@IUb%Nob$4j)jx7UMPxVqDXUk1K
+zs8&6DHP7D6z?#GJVg0?P4|d(#wd!b594+}|$5GXLO!FR7oX6H3uJYagudz$oSWvkx
+zD-%=N^=Wl1qK!oWL3KqnfR3o<h+;nFJe#L9sCtJq?~vjgT6a_}{B>5&_1&9R9c`MU
+z%}6G!Iu0w2!+GqJs`pjR`>Nu66%tyD0nM>J*S+d!RvgWFgcGXwq~<-TI8Uy7Ycy|5
+zF1395!OtG{Kkj%m{Ll4In*Ols$u8A<PV=72oLlGY8dq;{Tt1|7do*s3!tGh-Tni)F
+z&Ya`kL8WbarGDkklUAs}^B)u1sHohSR7b<wXxM05^M!Mr%gzT~iZ2Y$%9SsVKM5Lj
+z<<d`;w`A?oME=tk{@%*krrAHk`lnfx!ZiCG-;lkn@~s-*s&K9J?4;}R0U(hfxr?zK
+z3CAHDL&jiBL+}<0I#4|6&sJfdw+a-@&UqekOmMTNPRpQEo}Y!pUeN_&QVz07K)Lk8
+zOd5umoj@P+&ck_&iC&TRoJHbFW*IJiVDU;nE+p8c7Sp(5I055qrE%sNfUCk)=gU+n
+zM6gKq(iq7BG@PYxa5`0{am7_ux&rESTrj%KS;J`eCVC!d@&4a9NYx)zRk|ne0ySxH
+zq4Vt0XHxAP8^(OLZ<Jo4o?>1YvvHI06iMi={5glzkzo;n(4F><muU;wIeOo{4n0If
+zfc7KZOf6krt<cmZQ-=M;94f)90=0OlTBscq{^jG#WoB_VwY|ENS}F<j(N!{iM!a8N
+zG<}#e&vPLJ6;y{lxQ(OX%ePadHY_MwKr)FS3;^!yC$Jtz@HPVU#tC$?XzPqydYxe}
+zO~ev}0M46;+yP2!PI6S&WCqtg)taXhjLMZS-uiM}IWnjo8PotC7*st&nrCQ(ao8Z&
+z3t*95uddaqUwX(s-2bS0rCzOmU8{Z_4s2EZn!9ejcH6z3xgIc+!)onbt#<FCeckC@
+z@?=FY8B<Ez^~c?huYP_KD)9X4QLXn)<?1_X?=`LWn$fmlVH=0poVe_GFa<=RZon_a
+zuN{9hwJ2Aq1-Uv=j<(+1rZsmxwyVv@wB}<Q))D~&>wBxE>H-)Ugc}C5GgY<Op1Yn!
+z=c04X-H>xC{BDKYP0fudmcg@2Eec+K;HO}AVT+XDU&=#QhU9qBGN=5I4NdvsRWG0L
+zt2HP5DziM0wDVocr*2upHCkwfjw(rc4u_lsqG=%-P84#sFU-l^1T308#hmRK<H^1I
+z%i$b*cXVmA*i;H<AZLUzE|CFz#?lj2c8As7<qXL!KtjYs2Y?LoE#>f=v!9GUKC)8x
+z`KxNj>srU_z(nQGXwb)<F-*U;Yc_7$5DXIOh6qskf6j~>x7&TdD4+Z!2cT{&6z5O~
+zC`lK5q#I`AWkF;ySssDDQZD=rg~un?1G(^2c5La6@ePo!7owYXWYLcR&6v*3M8p_*
+z2fuM5Bn5y<`MPoPEwgcgUI;^+Lhk!p$|FyCH*DP-D*uKCjhw+H1h~b53&HnU2EdQ=
+znQ(bPh0T}E8M^r`GbhQSe*(X0@}w+`q31%kUBq7m(Yz<a$%qUhK`qmHnwu6Q@Y^jR
+z=o)ozI2MYeBsoZoACm3He;8>MXJ*P(vC0TJp_RM`Bhi#5(5S+XG@N~5RORY4u1?|V
+z)?KwZhvE`cm!P?XOz#@!_=am(<r+S`rE)DA*P?JOYrHpO{Dk1|AiHoLP6$cp57LHd
+zcTB*~*y2o>aL`FmP;|Nk^A9xPsyk<9Axck%Lq?hoFR?VMr`za{p@cdBdbDUTox%PK
+z2+;2l0l{7bc*!DojidQ&BP(+TKhFXH&51*PkY<uF%R+-->JsQ#q)J1jQIW%W?mT5A
+z9#4}+7zUdJvH}GGyUMa_OjU;dtuZZ%`T3R^P=4IA#=N3z{d~)`D_cL`R{0ip+-+KF
+z%GfvT%)wV4zPZw;9OzLG^k@fqHW)iwOTn^rS^C&j`Yx;an9hC61CL)(I*zLy$F+{*
+z;1bw#=okQI6S>PDq{~}Obr;KCLf=$^PL`$Kssx>k#rgiu_jWE0sceJBHf&fd>^LPq
+z&VFxYERCf$R~}Vy3o5%?V|Q;@IJP+lzh}e062MVyh29OX4f{5O?2hlT_0OfQ8YJKJ
+zUejXmVf)I}m8)M~`NOp**OXHiGEFKwqOl|3ciC67uw3|80?2NZEp%_d3VqmF39=`?
+z$5x2l3te>O$nWjt5VH7*#{Oh&Z`VV|W4F5ZHEr)}8%!-LP>{V)s?!=W-3Ry^7DU;b
+zpSj{`e|+rmv6UnLbo%qt%AvDJwO3<%H!M8cw!r|vaeXk^d{c8l_`@o@U1PVeHMV4L
+z=jPPL{aWLGTtyGvz5>M2I{*y@0d2*t>sMKy#`@Mgb&FTCf2DfbG!L+2*^6{^0pjRw
+TfQF-?&B?LVxM`Ju8utGMY>Y?6
+
+literal 0
+HcmV?d00001
+
+diff --git a/pulso/__pycache__/reloj.cpython-311.pyc b/pulso/__pycache__/reloj.cpython-311.pyc
+new file mode 100644
+index 0000000000000000000000000000000000000000..b1bbf8b7192e5e154314fbb889e5b8a2122ef2ff
+GIT binary patch
+literal 867
+zcmZ`%&1=+95TBQ9cGHio#g;`uA=e<ywt@#iw2Fla{W!FU<g$Iud)h3?zWDOe(&Awc
+z9z6D-^s1tjqPPAD{Rg(tLkS24PrWVlA_cAUvTZ@cN#>WCdGqmRCSR)6en9%Y`?L9x
+z0Q}I(1zG39iI2h-Fz|s9W<(?=K8X$Ah)v%lU;sCf4Q75TZDWqF$US1#wt+fwkNgrV
+zQ;StzgI{JgVuh6#!0pR)foUPBLj#r3$YI=xP)QQcSrkk-JaU4)T^7C&+O9-QwF?dQ
+zJ~#=*u$LJIh}2O$RjGDKGR|nrc^)>Y^p16P*UW836<1-*^FED?M~ddQ7B@tTAOAW#
+zJ99~Ht%yvf8&@C3T!sOy&x)4ft0CiJF6gz<LlZxmPi7FdK=rHzCO4HnIj81j|Ehdp
+z189~m<iBUO06S#PwQ{RbTwdqN&6Ze`dK<Z!sbB|Abm-}LUByX#nYIEkwm5!g?9mv)
+z`o`M&-HFwSy5xzdCs~vV6eH2}lJ(r8D>!61jL~}Q>2-uQd><I@40!LR-_Cr#_UXp{
+zsCO{xbxNKb!qeb#m#ApD=vW7D!7HHnPb`4!L)9fxTXBAsSj4=gM5^5#c?B`IieBUh
+z$~tR0fY64c!IAcqeu`4AomUzSCW1yo>MBwXsMmG>?EKu~)YB)Ar{;?)MF&MTS=CND
+zXHn?Xz84FYMf|?3p-tZ)T|?-agpfm6>cG+=-0uAU?UrGv_U74UxEa1*?$q4<ntM=l
+jJGUO}S0@julkNT^d$4VF%Y@Xsa0#|SM!WDY6c_sgL(I(~
+
+literal 0
+HcmV?d00001
+
+diff --git a/pulso/db.py b/pulso/db.py
+index 59841ac..7c0f9df 100644
+--- a/pulso/db.py
++++ b/pulso/db.py
+@@ -36,6 +36,10 @@ CREATE TABLE IF NOT EXISTS correos (
+     cuerpo TEXT NOT NULL,
+     creado TEXT NOT NULL
+ );
++CREATE TABLE IF NOT EXISTS recordatorios (
++    reserva_id INTEGER PRIMARY KEY REFERENCES reservas(id),
++    enviado TEXT NOT NULL
++);
+ """
+ 
+ 
+@@ -129,6 +133,24 @@ def reservas_de(socio_id):
+                    'WHERE r.socio_id = ? ORDER BY c.inicio, r.id', (socio_id,))
+ 
+ 
++def reservas_por_recordar(desde, hasta):
++    """Reservas confirmadas sin recordatorio cuya clase empieza en (desde, hasta]."""
++    filas = _varias('SELECT r.id AS reserva_id, s.nombre AS socio, s.email, c.nombre AS clase, '
++                    'c.instructor, c.inicio '
++                    'FROM reservas r JOIN socios s ON s.id = r.socio_id JOIN clases c ON c.id = r.clase_id '
++                    'LEFT JOIN recordatorios rec ON rec.reserva_id = r.id '
++                    "WHERE r.estado = 'confirmada' AND rec.reserva_id IS NULL ORDER BY c.inicio, r.id")
++    return [f for f in filas if desde < a_fecha(f['inicio']) <= hasta]
++
++
++def reclamar_recordatorio(reserva_id, momento):
++    """Marca la reserva como recordada. Devuelve False si ya estaba marcada (llamadas concurrentes)."""
++    with conexion() as con:
++        cur = con.execute('INSERT OR IGNORE INTO recordatorios (reserva_id, enviado) VALUES (?, ?)',
++                          (reserva_id, a_texto(momento)))
++    return cur.rowcount == 1
++
++
+ def sumar_creditos(socio_id, cantidad):
+     with conexion() as con:
+         con.execute('UPDATE socios SET creditos = creditos + ? WHERE id = ?', (cantidad, socio_id))
+diff --git a/pulso/main.py b/pulso/main.py
+index 039212d..75b7916 100644
+--- a/pulso/main.py
++++ b/pulso/main.py
+@@ -1,4 +1,5 @@
+ import os
++from datetime import timedelta
+ 
+ from fastapi import APIRouter, Depends, FastAPI, Header, HTTPException
+ from pydantic import AwareDatetime, BaseModel, Field
+@@ -82,6 +83,21 @@ def reservar(datos: NuevaReserva, socio=Depends(socio_actual)):
+     return ver_reserva(reserva)
+ 
+ 
++@router.post('/admin/recordatorios', dependencies=[Depends(admin)])
++def enviar_recordatorios():
++    ahora = reloj.ahora()
++    enviados = 0
++    for r in db.reservas_por_recordar(ahora, ahora + timedelta(hours=24)):
++        if not db.reclamar_recordatorio(r['reserva_id'], ahora):
++            continue
++        inicio = db.a_fecha(r['inicio'])
++        correo.enviar(r['email'], f"Recordatorio: {r['clase']} el {correo.fecha_y_hora(inicio)}",
++                      f"Hola {r['socio']}, te recordamos tu clase de {r['clase']} con {r['instructor']} "
++                      f"el {correo.fecha_y_hora(inicio)}. ¡Te esperamos!")
++        enviados += 1
++    return {'enviados': enviados}
++
++
+ @router.get('/reservas')
+ def mis_reservas(socio=Depends(socio_actual)):
+     return [ver_reserva(r) for r in db.reservas_de(socio['id'])]
+diff --git a/tests/__pycache__/conftest.cpython-311-pytest-9.2.0.pyc b/tests/__pycache__/conftest.cpython-311-pytest-9.2.0.pyc
+new file mode 100644
+index 0000000000000000000000000000000000000000..5481a65c31e3bcefe5c0f2043224150a85aecad4
+GIT binary patch
+literal 1896
+zcmZ`3U27aw^xoM!yR*C5Y+93zwN?^?wp)^{v4~A<lO|TEq^8AIZKuLAnYkg8&c|}+
+zZkk<+ESLu$e28L6K!iMKY)OUw2mipVEV>L70wNeeh~zE!;JLFOc4Itq@0oMY*FAGS
+z=KEAC5kUxDx%%aw^}mOH{uSspC{1cV0Ad{($iNm-arl<(h%RAd6II4SB3V&8sz&XY
+z8Vk?ZQd9-_5i4#d)I`W5R?_ZLyX=&j3eU3DZKu^VMiQb?BWlD9#fTe-#+G_oF+5Ie
+zMG@MD-2nBNku<tYtRAPz(sM1Yky=GtaM*4!klNcJ@BWXx&q%K#HDll#DBH6u?B=pk
+zpcopb+_Y(+2wZj@n#DolCiVE+mPs8BI+8IT$c$R<5{TkDqZ-R=g@XA<458g5IND7J
+zlm-L}QC>Ek1@|C%Yh>E6O=o15mdZ)p(w6CnCK$Q|iY)*aXbATHFh*z=VaWP@yxEd=
+zyba7n;hJzCDo}>Yx4>>2b_2G+_jcPq{(oN)PFgky8RSI!aM%ME5jJ6|ZNtSEH=#2E
+zjCiUgL5Pc_G@-LzomL;BbqtnA-eny6M$t)7LwPPxu77a##<l$AnX*zSTAn)!g-SPg
+z)0f|ScP>Bs&TS^5$tpqAqntX+LB!)MkV7#O*9G!|xugl!m22-$GZ|P+jDhG4ZWr<e
+zjV}gC+jZ{J643ghC(=7GaBwaM;@rIE=<dkP*WMVJ839x(-z$xeEsy0GEx0)jUF79-
+z*I5wMXrUCu^suQY6AABz?R^U9cX%pjhopZYnV(2zt^D1&&6Ou-tEVqihc4EJE>_88
+zjZFGvvffhh`_KIF%9B*>>|~Wp)yR}jrk;}c>g)r#N-{N)@k!=sqW8h=FYbJGr<xe7
+zB?f)cT%q0?sgk}L>GNA_AHqO-yN}=?YAyP0e;Cj@;?KyI+O&ZUsk39CGLgBWXpd<}
+z8@T@CBSy>RwB~4+=!#|+EIO*Yc2;6yz=LFCm^@cE-7F51;tAga?0F%ULjgMlbU$pb
+z4^RdDmP~y<xiRdY8LuWMYRL(oOt2R~a&+`Bf&~6#5GPDb<ljF38hs;~;$J}Kg4A@8
+zFS^VuYut35a%=`BoU(yH=I&kUJc6kXV|X?+qJar}8Jvp?JaK;o)w@pmr{3HwKK$t0
+zPk<0BdEO`I!|<~Gfihn-Ep9qq&~>R$%C}D^@`X~^A)4n=CSn+6^d2)g4dQK95Nq)g
+zU@X-08e^hDOq42!HkiTj1<m7H!5kGTjdlyWI*`K|2@~Jw{6u4DY|V7SmJcFDt}~Hj
+zCVsR*Y{6XNMaYE6T9|?GgV~@siZ2eUbf8?YU888xNtOeiD4%x#XfJ{>u8XuB{rKqg
+zk!uH~D&bQ{S-*4bpp*VltBwZz&b1ds@nfGUYrSi1<Mj=;Iri|@<Bxr1qN+^Pl!=O5
+zk7qVgzVd2C22Dv>eQ8gUab^zz`YVE@o))90Da81#Jp`yN6buF9alt)|!rc4=^%JyL
+
+literal 0
+HcmV?d00001
+
+diff --git a/tests/__pycache__/test_base.cpython-311-pytest-9.2.0.pyc b/tests/__pycache__/test_base.cpython-311-pytest-9.2.0.pyc
+new file mode 100644
+index 0000000000000000000000000000000000000000..0b71ffa1455c7261dfae91d3f9d5dc7b41988409
+GIT binary patch
+literal 27941
+zcmeHQZHyboc_w+w&*gpU+p^_TB*&)h`;v60)0cfGSw2gSBwLc@NKV4gx0FShca)br
+z#bTDNS{UusP-D4u>r1M(=hSwjNJ51+Dg4KPf%L}(NB~mcAqD}XMf2<a6b6j;hkg`&
+z-kIg>%#wRPS#DF*TJ61hXXc&RnRkcte$2bOKWS}^wfKC#`S8X6TJ|^pp873taRhAa
+zvmXF?+h_O;f7W-x&;Acgw2TM*z6tF_&`%|SY-l2UBFylXY-A#OB03Q}5u4CY=qyjm
+z#wS`&v;q&l<~z}5gaF%(Fkpuf0qiuQfL%rmaG9Y4E;r(UD~wjal|~!jDx)26wc$VF
+zOLQzy=ME<PwP+zTkv7uVLMqWx3ywZ<VBbOf_tc@oqctrxRX7EbfbrtE-yRJ87r`Hm
+z`m=|FG_ZnHc3R+u-v|^mBIidTT*rJqqve|RJ}9pW>LLo?N1IovU3U1r+6@{Z&vwIi
+z&~9Xr{ze<xjWzby^36))t&anvjj3ZT`7QrxaE>3PfT5RKtbo<>GMg|Z&C>EeEwt9l
+zeZJFzb4J|KPWp{jqCOdTA6L67u4uFsI;A?%I{rS8tM!EMtS`S@X&d9<hvip$X{vO(
+z7u}>ESC)J0PzKZ%J*Zk#Dx>{UOEKj0m4Zfx(P;%UewGRq*3^68^C>NfYg-|;B{lVj
+z_~E_kF9q<Ym0FCh*L;?Lw#{kN!Bmbt;ZxJ4un{!;F9mR)!j@*=vxpVRXO&*b_bh^Y
+zwv4FV_e`nb@GY$N+=I&X3o@2p3NTJZjTOd9D{AvCwgkSp=BIjfn{Q$8ErKyGiD$+t
+z=VlqJ9UQz{^VQ^=;lrYP&%s*c$eGOKWM=ZETFW=mxdmDUuJ~)gQ@JTKU(=4~UP}E3
+z=DzPp?&L47rxs{Is70TgnjFvMCR5o3S}u#>zVU1-pUyALvC6jsyLMgi7dJof(3x|a
+z68YHoZKQiwH(~vWd~d#xDoo{*<2fT8D|PSU1%ruv&2L_5skMNJz$OBNx7t$qeA+Cq
+z%3DE$%&p4mPb<zc{C&0#;BDVaKFjy*7_DiB&$-iY1}^9rvA-6Y%uT##rmy%Cfm)!q
+zzvds$)2O<;Z*A!-Oq}U^F*P}!>p9v#*t5F_;9T*0=e7-;9q2RDXL5aobiR;hF!>^e
+z+<WHSt=P_NCSMrOO`LhGxP!`*lujk{xoj@U8IwFYRhTkU`DA)BnKO;_Wbe*wZakIE
+zKL(^;nO2Sby#VKZW&L4(&WuivPM^B)w8;1j<+wk^F5=`sB46j-mPGzafH*TiV2i@D
+zA<nZQlij?w?9@vsGo42-!G-+7ax|D|H)(aK>EmWPW%5p&G!sk`ezlgD(uJBX-LqP3
+z<jgrX)RbB4OkyP2B-mpT6VP@oj^gBtQ<-cbGnuc2_*iSJlX=Xltiec=FJ*Htrn1S&
+z)I_=#P3BW4)6_z(ZIs<?%&xtrnKNt4k|%TKM5>TXzj`K{noJc?QqxZ7bCU_Z79P)L
+z(vyX>xr+6kuFB`iKuvcNTja!Mp5ToR$%$c^tY1!SlF0_;#MV5mk=@Q=ZlIn#xWs8-
+zJ^^ate7=TzbKduf7JBXA#qBdw@1?J2K1h{&M=HG|Rlu*0RJ75mHd@w3InB__@O#f)
+zKmNh9<(|hYJ&#ubA9%c?ja0RfvNpnLcFYFfo4S7PgICIZqm{nVD&T{o6>WD_+g;Xn
+ze;jFlLw{YrxUUjfSB<PYKl-sAzp$&U-9NJjV0zcgo}2pp!1y_@-CwQaJclTNRq6$t
+zLL^bdbEXGGUPFdMw2KpQikUs43cmuNe4>=s<m8+N-IHs{^uRx6zo^;HpRD}x%6C@3
+zyBa^JivDmFx!Uf_XKxhCy~Gpxnf30zsWY5$X}-=bD&;4m0nRyT6QDUpX(xN_QeFi`
+zPIZR!91x54d36q5#5{@H^TyEYLw_=SVff<cg&pNp4_5Vu%3AMbwB1|QAG(Zw_Y%s^
+zd9Alv$L&la0a{@tcDeqLoV<))JJo=T<~YK0P*t?f>E&9kDm-aEfH|%#*`y58+VWX1
+zCjQ%4uumhwkCNYjQWStPWVzHeD5WiqI$zR^Kq+WxR?t>?LRKjM+k#MIp{5Ge-Dt5w
+zP<f!pT0ytUV+0FAHANj!UsbZ0nkvdbM?#SumQPhrpr*=nLhW+XK}`*MP`VUf4=NXT
+zJg8jCtOu1#b@QMKsv|W*mqJXz3mai0Vufu5FCwe`N=t&zRzz({P1y>b-&T%WNI}M5
+z2nskUEzyI;n5}X2ZQGW43p$9&q?o_>GKt0Ey3PT_);S;oxf%k*&hpSqAnIbJho~8d
+z)I_Y*TvZu>=ry<F_9sFnsTk%x1QG-u0U#MXT+<+p2a4^I_A;;;qL{KbCt_wFQTG!V
+zAh3zRW&&FX3=$Y3u$90tKqAU6Y3`tmT>!F-vc(d=*j6rqZCR+uvTeMG%fEq5N@`1<
+zZjcaWT$Zh5vW)35$;@Q>Rj4aW<Q@VknRof!;Qx8w$9fkQC2i|P3t)Q3^p1;GMc-J}
+zHzHXkq#wu)NDQR<Z$P$eC6t}>+SY0vw=;<ZXr*4lNkkGwJZIWXB4s#4J9tH21^r^J
+z+E>*#s>yyic>{vT=^Jpndv%28pe4JpdXME=t}0&1#wC(83${f55xg64*1&sVv=|y}
+zz0jo~v|HaS2pSI~Z21eM>DkA%i0Z{C1+2hnQ4YH^3j3!;*o{Fe2wPt)T3G0`dP_zO
+zi>KeviMnACjTeNqC@+pp7E!rvfxDM_ETW<e?U8?n9d0@-qHzyO_rlk_J=el#wA!|Q
+z$Y?X#t&qK>g$ra~*oSgG$6MjDk((}Qw3G$G@4&3Yt$Mrg-vGTTl17JPy_6zGCxl%@
+z2)n2ig?%rNNxn}}+@~(0cHbwZhQn3Ya_m9nUjCQa_I=D)Zmh6kHm~$0@Jd&?qo(ZT
+zKLTDwF=kmcXfeX2AXI}ED`@$zt$ZKz_^LCP<5pan*{#N^Qk&Ikwb|-HyVZWtpI@(x
+zP3BoUc($78-8?ha+~M4AR1oC*=G+Ar9p?5LrMC{{(&o1Ne%*72<8Y}Zp1)BS9ma8w
+z$2j8Zo%f(>T@qEBN@c9Q6lTgvhjFiQpVeW{&dw#w&Q7%@HD%9E_DjYLjpMHsf9;rS
+z4KvkPXWX9wO?}2%@rKp7)oPXIY&+&`m(^}{*>iT8wG4B1i^3Oq&Mw28?I!xWb5`Mz
+z_<c3;A&W9auKaH1Y`Z$QlrcEJ_AZsmSbr(PW_G9XHDiO-Y0vECOPJZq)t1zh*UZN3
+zURLU2s`ti&weT~UYzjJIEqEYh7E;CKoBB5m^$ZO33~V~OX<&PQKh6^iJ&<AxBpa^;
+z&HM3REe20e!JHZ|z^4<+OlIIeti=sD#mJGEoXEhbGd^`DcdNB8Wguni_g4buHmV&y
+zl};IHGr#alq?odAt|W~7KIUoy<Tx|$Bk(*xaZQt6J;M5Cew~OOB=9hSM*yz)*<}{q
+zgesfx7mK9+Z>yUOKx~r%&PQ%V09o9MIFrjuX2hf2<geOAt-{CYZB)P{VH$odXrv0c
+zd?M_&E!I+pX^>=KY-5(hCe^@z(ZaH~6!mZRj1nh%o=%^uX}N-#!pQ!V`as4D9|vLf
+zK$;BK!$MkYY>#%^H;N4wZ1Nr~nO70d0h%cq>KK7>0CkY$&?GBrC=tj1V6{nW;%(Vd
+z?0zR!aD(c*RGUpDW?Jo}B-vNyV+0;2FhXFIz-|J20A%aSb|i9xYgn<q2F$04n7Kr4
+zt82588dS*bGTU@h?X#`<6=+J>XEMTVwH4eaOSe5qu3X!bn?o(Cng18?38vbr?i=Cq
+zp5x`0C(7SDSB@8Pp5IIU!1(L&i^<D_A3iW0uS7<wk&*xRUO~sF_Ec5BudMAXuir@!
+z`1+kUb%rCU?VQ(kRvAL2{A4u1E3C*S(C<@{>+Mor1w~GEhVvZM747rt9J+{kk}PdB
+zGd9x>Fuikn=S=(MbXnh0(YI9fEyx32)!_yn`v^8PQX?P1+#VxT8>?tz^V(RI;XJ2K
+z!V7r`CjqS><T+$r+j$KcsBh<C$V9|bGwrS_A}K0dPK!KVN6HXHG(f3Yj7m;^1Vi2F
+zEO6A5Po9I;`2|qK>E&87eN)_K{3&AmsShURj+J*E1tx9*Qu=ch{kf|C9I}B|^%NoL
+zQ!JSRa#LrxcB-PCn%7QMQ7WIHXT&JwMVv+?LCkaLMkpjwhC_rKK}5U?-3X<MNQw%?
+zcZEdC5JVWX+$;@Qx=LA3DakaAR16b1+L2G5gC6ouqKMPWwPgCw#TW6Td<))`W_}dO
+z^&EhG*#d1H(F~vCMS&|>(%XaZqJ&_RhHSk(Y=xn>XB2%-*4x9-+jXLE(A)3SkK(c+
+zJ#91>-6DPzx0|`S{_L_yjn?0pt=Wp`56QdYIO<jJ3LN^XbuGpvd(Tu2*;H!?4c)s2
+z_}Zq-0#V0ud7eC|TsFK1l`GB!5i8t6h_Hy2h;1Q6mtY}8)e);H+d`m-mAX?t2s~U0
+zG3%h~p!qD+4D&ERaaj`$+&n_XM+rPf-~@pe05Wu)x)Yx(sR$FWl~iE1lG?<xf5%EH
+zlu2(T75;ijMWkP_ht5h?g!v=@Q%w8Kr-0s4T>li^KuYUiLN`wmHMMqIIxF@JXv@L;
+zE&;I#VD6{nHwa7+$PhRPpeUI`c{0Wvjgjk%>m_~BOpl*R6;sKR^nWrB4YG&`4|59D
+zD6As?8{8qGJASi#I$J*bYB>(|@f>tVu96%h$#|?T4?ldatnaDld#XCrkYm8B`XNG&
+z9An8tKyK;`*N#=RWAoavDoW)O^o$s#yol3?B#3zqNk4@|%5aDv4vC0YA#tcw5lK;j
+zq@O|}W$=D__2)y#M5U&bA(|)dNF6Hchm_<IVv67haDGVvc@BEOJAr&oFV_;piz8fS
+z3O_3DHthqky@#_{ufAA3rJ-F5s{Yv`8g1B%@QP3jVIL!4L>v!z#xJkxZokg8sH<h#
+zDh}a-?7&uWtYNG8r-k-<x$FsoTn<4xBd)R0dk(24?E{>qpA<V9B+GK8Z6S>;mz0Eb
+zmirK|x96sV6lwLKbW4%u?YX3g(Pr;*gpGEiL)y3{2ZMbm*Ar2ROWL@#H*2kyS*bVm
+zb{lp%I-Pr5iW*(eqoP8Oidix2a!9Q>J3+WlG2EwRMD5n1lo}3KU9!!C$}LOlQH(l^
+zV$^L}8ZUf4uUy{krm{2&`5D8QeX|`7haAjUwdky0t^UH6#P2l<zwf!rZ-?86j9#m*
+zI)CN+YnT4JBp%<Z@c6#3CXbaUd<qp{hq_jN3tB}9dmzR-g=6=BH8}=8bSr#V|JCFJ
+zvnIZF&?K>A((1oJqI`k$&_uwbK-pRtKF%qqueYKI%td(c*;Kw3v7=OsS|DREyTbf7
+zXcylvsD;vqY&CMV*m!R8WCpROMylB!L9wOpTn-xr-=eEW;9WH`@X;@j)mV(w!;#EK
+zkz61h0lI$5Ou+=0OpT;pO--E1rh5?{TMMP~Q<H^UvF9-Fb+>cX?cEe@-JQ;M5A^p9
+z40NZu5mntiFuZ+pf1-;8=$gG~*$K?$b_B8Jw(JPz`)1)s2%ycGW*S=!ZT7}PK1Ulf
+zLB_~0;1Um~C(mZU%skyW$J!u_TO7U2;;`?SnKaV*@hOB8!Bfo{nmm`BNKG0@vyPds
+zqn!=-vt8Gp#M>?$oEe%OzW&_LkAL)R`I*Dz!6TKyBUQkjBbE5kYW%3<%6{Q;?8e>?
+zHva7C@`EG4-Z(e)%SV3o2zj=TRU^l~a-Qv;*?Y@c4;<UG_ukZd2xaHI)>EzHb|#Sk
+zt*{cioZQ+($dj}8@)WNC+^$(icn)Yq>zrP$<*EV`@{Jv@@3=Vio^g5botNKzd3r}h
+z-&EB%{YKx4V6lq6t*USP01>-;%i8|APJpt$cdqlMzMoKb&TIRtb==M*5}*}UVwdZC
+z<>Xu^Pw@)C?V5Fj=b)-+ozu&;TvhC$lvnl5K5$uk_YojCD|$bI;C`bI-qZ&x`qnA}
+z;D)j1u&=BgnmY_o*7waFzDXvsea>r#s&(AXBod$%R$`ay`{d-@VV>d@fQ#nj98?vp
+zb9%X!tI8)GU2nzSjK3BCgMH_p$Jj0oU3k2#^_AE40Zu=T|8MGq@^fD6tJZOz!$^Qu
+zSP3tmMyxu~+0^UoLS6wy91)P`fLOH7t8*yGWQ008T-7m=50$$Q5d_|S=<^s%G$7{e
+zsB;*zoo<Dl?6ylen^43N0eQ}Cv6$CwbX}8y$;@yA#(A?SX$lEMfC;&*5iM=eLyVx5
+zLZZk`4Hb(Yh@TBYp-|k^`TtZRbm?mBFhUkNsl!d3)REs=#B@aIt#H}8-2om{E>+%x
+z%4MW`P`M57<}u$c!`q`Rx5*i`Lzf~(3}&w5z7<L|9ypY*NA4PSSS}N{smbY%tCn53
+z@q;G0Y0U2v=pyhP0!adPjJ3sL2>yrMvrF>EHU>rr_pA8|^_0A?rb!?V0Ke%;!fz|q
+z+V-_NZq|L&#C`%ze63~y1x;P7t5k)D{HlfA%jrq;0&4V8ErUB&xeN8cj9%6bT;6`;
+zmCINJ4=`V<4piS>(YIIi?Z^XO)t>}1w}GXeoZE0yKR_ru=d}aXI&Np`AOTvbmv9o1
+zL=n#+uc=+RA;Tep8<mJS#f&beE@K^c%Ba&y@<};4w}Gd4AAxg3K%RrE@CzZI)62C4
+z@ludRFDDriY<c}REF@pd%h~W0Hkx#KA_IsEBws%}5O0n6Uo5WJX>=?-EaAb${5+))
+ziy(wY(h4<15Mr-U@^nV96B$M1Z`9t2ga-{fk#8uzF0luNh;H(sVTrM#ZXX)rs_)F#
+z>DpoR^mV%E*iNME@pJrl?uEHIm3v`sPUTvdm+aYHqi|Aqb_>E6jQfutwDTST>=`!g
+zfp-n^_F~uY&baT2XY}O0iw@UrYu;b?v+N#Jt|)j9DtEkjQx3U>8Fn>eEbdWfyP99N
+zCsy9k4AHJ8{wM}LhTqfw?k~9O?k`yW1$oS&yT4#2QQWHU-CuBt6k69Wn0XYJNghR$
+zwp&b+Et0}(QSt=>!f$xRU;KNf@FHH-jz<7y$0H1g=mWy+Op)hg(JK!;!)BrKs$sJO
+z&2($T(z2%#5dwj51@DLj(D5h%<`(>8jO9wq9c9b3WeOu^5er;pevy*n04zvhs~Wq2
+z;9!=$ZQ+NIZCCi)0=^t)<ds(5UFxYhO~9pcGi{p%HDsxGERNQWjvZ1`b{wr8V`~TD
+z^3<mOJn4FhLz4R=*D&>bGKY5(Feh>nzRTp<^msaN{s=WT<1e3p_J(KkU9QK$vC80B
+z6|iTl5`U^1e@cWwWJ!n5LWiIF;ONi3Uw#<j57}QIEgydVmoNP41>jt%NB-OkW&L<X
+zKVH?3BO7>CPZN^KvSb>_O`YLdwxVU{wQLoo@(FrIj8b02X+#plJcm?!g+$75h@jdN
+z5wAk3y^}(BT`h>DsQ+t31}YbkGI+PWx(DXCs>(Uy0&_2LD&7n+Pwt_Pcnzt;8RD5>
+z7;xSN0eKFZvRh+32EANM5HAIR%ZUPW@8148OTSvTpHGoRtjtSTN4`8O(+FM*sqfn=
+z1(Y3EVRO>M`7XC$i$W<}Nfw?4cC1p^s8ULP!<lN~`swuzByQNjV{KqlDz#zZhGad?
+zt+kZGuyC1uYlW}H)%Htxmz5Luff$k2QVdZaG26n`EuC4oP3<M4&C+4vwiA7Wh1*e}
+zhd%7%w6HVZN6yuHHh({v+%`!PcDP^Y02@oDb7E#(79ljW4i8GV?b^IOm*(rymfNY=
+zxx~?~QQ8xuEr{_nv2dIA)4K*Z&}nonu|FzTMSt8g$dmhx7H*d^LNPAOZM!xdl{*5;
+zqb-*s)`QCRo-<>aZQ;h*6V-7$)~K~WkI>nN(vpZ7vRu!|sy+xiZkOV++`2KvAL*qS
+z(~nm+*N@2!oba2+@!u3VJoZneCcDRe@sAVfVzJ{i67mMO$#iJPhs?C;KSwRT3;zSc
+zwi6Kgsrd#a-z4y70Ey0KTix|nQ}O-jR{ox<`Zn@O(cW#jc=?{UDKt;^lw59c{nPwQ
+zy4KqSW(fQcz;m;Ety{U|@d?>%8iBQci<;Z0_II#jv#5GGmnz4fsl=bD#-BOA_Y=MK
+z!ecW%<pj1zcUJYC=bymKo~qjNi$`ZRzI9@D#cbi-wb!8tZK-N_7HG>|okXZ}T+O?y
+zlVHyIXcc9i@9r;8CxHjlCAaT-zKPdZ`DD$<(KFoo1EgZygYvHD+x2b~_Bt-vYb-qR
+zP4ohpPH1^<y1Ra}2HgOj@A`8+q$IIOJd+p=ZQvYbIAY%MoZXJBH{YUG{sO?uKeMj6
+z2u)9%Nf#+l?;X?~q52Ouk)p4Z2lrJ5_f-LV_EqBhtMUDJoivgF{HjYt_%g*IB;vu(
+zk%;U~;gFrqd%;V7#hS)M<OjW}t03%Rglvc~4aAv;v5%|l6Vh*~iTo6{Ie$|Zc5Lx>
+z?ltvG_}I>|u!(#K15#U6c8=Y4HSHW@=bImR!&Gb2eJ3gC<g^$8>}uLMZg0AC+)<#n
+z4cNzNu`)NYtL3(xmDy!4Lw?G1Vzf=<XNL!+TYffg&ux7-r*c`}M&}YoyGH4o7;Qmd
+zP3-EXJ@Bq!+tqi*eb)@~<i3jz*X~kA=-ellC&GiuZGAT#dxQ1eoXTZ=3%gopcD1u}
+zOq(F~q4Y{<4AxSf;aOzo*tV;uC_G?vGS&UeFRqyBqWKz<>~+kLq~{5D<m=-5Qnw>r
+z6CK==zC;)3B|wV_d!_RijT~Q0RNw0s)fDSgkCQk54wv4Gzx=2qsCSkV+Y!Yb#}3L^
+zH9iLG_U<N2eb0gmXJNg<yWAkI8#1^H+N-9#rNU|C9C3mF+nX$2UUrIUVixT`VSasi
+zUUs)cRwTX9ADE<v-cUc}r}QD|U2>&~q-S5-I2m}t_w7Es9n$NWSj2W&c#>6?{)<J8
+zUDMUx`+XPs(YB<K)cXs4B(i8rao7GqkUrvK1!sl!;IsrOhQw8o(eSm35Ox`)F+iV@
+zQuvBR*h1*B?c3*Hv5?nzSp%W3Sl}I<R@m*?SJrY7nbi=%B)98Ox#W=1A--Y(pSAQA
+z3u*5_xt@^cmdm@VYG$@imf{p5_zDHR*ckB%G(3~~!r~L~wF1pZoy$w&fyLxDv%7vD
+zm6TU((|jZk_L9Dezyp4}L5>Hk*5kjL|5f|52yCO=+=#s5R<^`XWb*axa_5T%c$9~~
+zZK~O)4W311@o9rc%Q~GiDSX=C^aX^o+8J!;jC+Z{4tm!s+7hkJ+`^I^>!Uj4P?cV%
+z?0SE)?t~iDf`t@5#88VAU`m>)$sCV8U@rk1p+<HQ7$vZqz#f3+@A}`c1fG~bMfInt
+zi9FVfy0drt?9}!2&odB!Lt~Ypu_|D%h$Z->z4OBF&77P)_4D9|(T`p!5AUlC@2dj#
+z@2j-$ueR?$|J27_t7cZ0JHPg+&mVl=&*5~i{vNNz9)2oEj^V6-0pRKD%P*&|ti85&
+zTCYR~tC2x^Hi~Y_?7&ZkemwNf@VmoERP;xy$kh(qSdB-j)_t_%qryM0E%&pqUF7#4
+z_`D!wq7hNNc2F;xl_P}vofu_K>5A+9!ZE>YZY9>#BK40_us3bj)+G67EP8oB3Eo85
+zYo@<vW(xQug~+Of?L0QIY7xAfFHK*l;@`%I(DQpV1^D|sn1)3wY%O?ZDx1&oN&5sc
+z%tHin1f~eQPT&H89}%GK0OrkLni88ZW;f+MKwtyFt;o)aoH3P6KW6>|k|cccy?~##
+z`2GHmX<9Y^SN5%Qo&V~4u<U()>|0(|&rd^Pf8VD*0hasy!<cS$5DED+n0^xM3ixS4
+wN-!4nKZ6_zuJ-#6(xi1@q{Tmh90|rXmLtKo0LzhJOrqy?;~~~&bIADl-@?8%xc~qF
+
+literal 0
+HcmV?d00001
+
+diff --git a/tests/__pycache__/test_recordatorios.cpython-311-pytest-9.2.0.pyc b/tests/__pycache__/test_recordatorios.cpython-311-pytest-9.2.0.pyc
+new file mode 100644
+index 0000000000000000000000000000000000000000..5376880bf077bad52b768c208066422491040f75
+GIT binary patch
+literal 27638
+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
+
+literal 0
+HcmV?d00001
+
+diff --git a/tests/test_recordatorios.py b/tests/test_recordatorios.py
+new file mode 100644
+index 0000000..b14a557
+--- /dev/null
++++ b/tests/test_recordatorios.py
+@@ -0,0 +1,76 @@
++from datetime import timedelta
++
++from conftest import ADMIN, AHORA, auth
++from pulso import db, reloj
++
++
++def recordatorios(cliente, headers=ADMIN):
++    return cliente.post('/admin/recordatorios', headers=headers)
++
++
++def de_recordatorio():
++    return [c for c in db.correos() if c['asunto'].startswith('Recordatorio: ')]
++
++
++def test_requiere_clave_de_administracion(cliente):
++    assert cliente.post('/admin/recordatorios').status_code == 401
++    assert cliente.post('/admin/recordatorios', headers={'X-Admin-Key': 'otra'}).status_code == 401
++
++
++def test_manda_recordatorio_a_reserva_confirmada_en_las_proximas_24h(cliente, socio):
++    clase = db.crear_clase('Yoga', 'Sofía', AHORA + timedelta(hours=23, minutes=30))
++    db.crear_reserva(socio['id'], clase['id'], AHORA)
++    r = recordatorios(cliente)
++    assert r.status_code == 200
++    assert r.json() == {'enviados': 1}
++    [correo] = de_recordatorio()
++    assert correo['para'] == 'ana@example.com'
++    assert correo['asunto'] == 'Recordatorio: Yoga el 11/11 a las 11:30'
++    assert 'Sofía' in correo['cuerpo']
++
++
++def test_incluye_clase_justo_a_las_24h_y_excluye_la_que_empieza_despues(cliente, socio):
++    en_24h = db.crear_clase('Yoga', 'Sofía', AHORA + timedelta(hours=24))
++    despues = db.crear_clase('Spinning', 'Leo', AHORA + timedelta(hours=24, seconds=1))
++    db.crear_reserva(socio['id'], en_24h['id'], AHORA)
++    db.crear_reserva(socio['id'], despues['id'], AHORA)
++    assert recordatorios(cliente).json() == {'enviados': 1}
++    assert [c['asunto'].split(' el ')[0] for c in de_recordatorio()] == ['Recordatorio: Yoga']
++
++
++def test_no_manda_a_clases_que_ya_empezaron(cliente, socio):
++    clase = db.crear_clase('Yoga', 'Sofía', AHORA)
++    db.crear_reserva(socio['id'], clase['id'], AHORA - timedelta(hours=2))
++    assert recordatorios(cliente).json() == {'enviados': 0}
++
++
++def test_no_manda_a_reservas_no_confirmadas(cliente, socio):
++    clase = db.crear_clase('Yoga', 'Sofía', AHORA + timedelta(hours=3))
++    db.crear_reserva(socio['id'], clase['id'], AHORA, estado='cancelada')
++    assert recordatorios(cliente).json() == {'enviados': 0}
++    assert de_recordatorio() == []
++
++
++def test_cada_reserva_recibe_un_solo_recordatorio(cliente, socio):
++    clase = db.crear_clase('Yoga', 'Sofía', AHORA + timedelta(hours=5))
++    db.crear_reserva(socio['id'], clase['id'], AHORA)
++    assert recordatorios(cliente).json() == {'enviados': 1}
++    assert recordatorios(cliente).json() == {'enviados': 0}
++    assert recordatorios(cliente).json() == {'enviados': 0}
++    assert len(de_recordatorio()) == 1
++
++
++def test_reserva_hecha_con_menos_de_24h_recibe_un_recordatorio(cliente, socio):
++    clase = db.crear_clase('Yoga', 'Sofía', AHORA + timedelta(hours=2))
++    assert cliente.post('/reservas', json={'clase_id': clase['id']}, headers=auth(socio)).status_code == 201
++    assert recordatorios(cliente).json() == {'enviados': 1}
++    assert recordatorios(cliente).json() == {'enviados': 0}
++    assert len(de_recordatorio()) == 1
++
++
++def test_reserva_lejana_recibe_recordatorio_cuando_entra_en_la_ventana(cliente, socio):
++    clase = db.crear_clase('Yoga', 'Sofía', AHORA + timedelta(hours=30))
++    db.crear_reserva(socio['id'], clase['id'], AHORA)
++    assert recordatorios(cliente).json() == {'enviados': 0}
++    reloj.fijar(AHORA + timedelta(hours=6, minutes=15))
++    assert recordatorios(cliente).json() == {'enviados': 1}

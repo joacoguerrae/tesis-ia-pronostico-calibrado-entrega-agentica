@@ -1,0 +1,20 @@
+{
+  "tarea": "T05-recordatorios",
+  "tests": 11,
+  "pasados": 11,
+  "exito": true,
+  "pasaron": [
+    "test_pide_clave_de_admin",
+    "test_sin_reservas_no_manda_nada",
+    "test_manda_a_las_clases_de_las_proximas_24_horas",
+    "test_las_24_horas_justas_se_incluyen",
+    "test_no_manda_a_clases_que_ya_empezaron",
+    "test_cada_reserva_recibe_un_solo_recordatorio",
+    "test_las_que_entran_en_la_ventana_mas_tarde",
+    "test_reserva_hecha_con_menos_de_24_horas",
+    "test_no_manda_a_reservas_canceladas",
+    "test_cada_socio_recibe_el_suyo",
+    "test_asunto_y_cuerpo"
+  ],
+  "fallidos": []
+}

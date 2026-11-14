@@ -1,0 +1,21 @@
+{
+  "tarea": "T03-exportar-ocupacion",
+  "tests": 12,
+  "pasados": 12,
+  "exito": true,
+  "pasaron": [
+    "test_pide_clave_de_admin",
+    "test_tipo_de_contenido_y_encabezado",
+    "test_sin_clases_solo_el_encabezado",
+    "test_una_fila_por_clase_en_hora_de_montevideo",
+    "test_la_fecha_es_la_de_montevideo_aunque_en_utc_sea_otro_dia",
+    "test_entran_pasadas_y_futuras_y_los_extremos",
+    "test_orden_por_inicio_y_despues_por_id",
+    "test_las_canceladas_no_cuentan",
+    "test_redondeo",
+    "test_textos_con_comas_y_comillas",
+    "test_fechas_invalidas",
+    "test_treinta_y_un_dias_se_aceptan"
+  ],
+  "fallidos": []
+}

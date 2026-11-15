@@ -1,0 +1,18 @@
+{
+  "tarea": "T10-reservas-simultaneas",
+  "tests": 9,
+  "pasados": 9,
+  "exito": true,
+  "pasaron": [
+    "test_el_ultimo_lugar_es_de_uno_solo",
+    "test_la_respuesta_del_ganador_no_cambia",
+    "test_nunca_hay_mas_reservas_que_cupo",
+    "test_los_que_no_consiguen_lugar_no_pierden_creditos_ni_reciben_correo",
+    "test_los_creditos_nunca_quedan_negativos",
+    "test_tocar_dos_veces_el_boton_reserva_una_sola_vez",
+    "test_ningun_pedido_termina_en_error_del_servidor",
+    "test_con_varios_procesos_no_se_pasa_del_cupo",
+    "test_con_varios_procesos_los_creditos_alcanzan_para_lo_que_alcanzan"
+  ],
+  "fallidos": []
+}

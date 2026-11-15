@@ -1,0 +1,123 @@
+{
+  "experimento": {
+    "nombre": "calibracion-t09-t11-b",
+    "descripcion": "Dificultad de las tareas nuevas con la versión A: 5 corridas por tarea. Se quedan las que A resuelve entre el 20 % y el 80 % de las veces.",
+    "tareas": [
+      "T09-horarios-corridos",
+      "T10-reservas-simultaneas",
+      "T11-clases-recurrentes"
+    ],
+    "versiones": [
+      "B"
+    ],
+    "repeticiones": 5,
+    "semilla": 1115
+  },
+  "plan": [
+    {
+      "id": "T09-B-01",
+      "tarea": "T09-horarios-corridos",
+      "version": "B",
+      "repeticion": 1,
+      "orden": 1
+    },
+    {
+      "id": "T11-B-01",
+      "tarea": "T11-clases-recurrentes",
+      "version": "B",
+      "repeticion": 1,
+      "orden": 2
+    },
+    {
+      "id": "T10-B-01",
+      "tarea": "T10-reservas-simultaneas",
+      "version": "B",
+      "repeticion": 1,
+      "orden": 3
+    },
+    {
+      "id": "T10-B-02",
+      "tarea": "T10-reservas-simultaneas",
+      "version": "B",
+      "repeticion": 2,
+      "orden": 4
+    },
+    {
+      "id": "T11-B-02",
+      "tarea": "T11-clases-recurrentes",
+      "version": "B",
+      "repeticion": 2,
+      "orden": 5
+    },
+    {
+      "id": "T09-B-02",
+      "tarea": "T09-horarios-corridos",
+      "version": "B",
+      "repeticion": 2,
+      "orden": 6
+    },
+    {
+      "id": "T11-B-03",
+      "tarea": "T11-clases-recurrentes",
+      "version": "B",
+      "repeticion": 3,
+      "orden": 7
+    },
+    {
+      "id": "T10-B-03",
+      "tarea": "T10-reservas-simultaneas",
+      "version": "B",
+      "repeticion": 3,
+      "orden": 8
+    },
+    {
+      "id": "T09-B-03",
+      "tarea": "T09-horarios-corridos",
+      "version": "B",
+      "repeticion": 3,
+      "orden": 9
+    },
+    {
+      "id": "T09-B-04",
+      "tarea": "T09-horarios-corridos",
+      "version": "B",
+      "repeticion": 4,
+      "orden": 10
+    },
+    {
+      "id": "T10-B-04",
+      "tarea": "T10-reservas-simultaneas",
+      "version": "B",
+      "repeticion": 4,
+      "orden": 11
+    },
+    {
+      "id": "T11-B-04",
+      "tarea": "T11-clases-recurrentes",
+      "version": "B",
+      "repeticion": 4,
+      "orden": 12
+    },
+    {
+      "id": "T10-B-05",
+      "tarea": "T10-reservas-simultaneas",
+      "version": "B",
+      "repeticion": 5,
+      "orden": 13
+    },
+    {
+      "id": "T09-B-05",
+      "tarea": "T09-horarios-corridos",
+      "version": "B",
+      "repeticion": 5,
+      "orden": 14
+    },
+    {
+      "id": "T11-B-05",
+      "tarea": "T11-clases-recurrentes",
+      "version": "B",
+      "repeticion": 5,
+      "orden": 15
+    }
+  ]
+}

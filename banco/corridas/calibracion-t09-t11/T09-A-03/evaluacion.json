@@ -1,0 +1,22 @@
+{
+  "tarea": "T09-horarios-corridos",
+  "tests": 13,
+  "pasados": 13,
+  "exito": true,
+  "pasaron": [
+    "test_la_api_devuelve_en_utc_una_clase_cargada_con_hora_de_montevideo",
+    "test_se_guarda_en_utc_cualquiera_sea_el_desfase",
+    "test_la_clase_se_puede_reservar_hasta_su_hora_real",
+    "test_al_llegar_la_hora_real_ya_no_se_puede_reservar",
+    "test_el_correo_dice_la_hora_real",
+    "test_clases_cargadas_de_distintas_formas_salen_en_orden",
+    "test_mis_reservas_salen_en_el_orden_real",
+    "test_las_clases_ya_cargadas_quedan_guardadas_en_utc_sin_cambiar_su_horario",
+    "test_las_clases_ya_cargadas_conservan_su_id",
+    "test_las_clases_ya_cargadas_se_ven_y_se_reservan_con_su_hora_real",
+    "test_arrancar_otra_vez_no_mueve_ninguna_clase",
+    "test_las_reservas_existentes_siguen_apuntando_a_su_clase",
+    "test_db_clases_devuelve_el_orden_real"
+  ],
+  "fallidos": []
+}
